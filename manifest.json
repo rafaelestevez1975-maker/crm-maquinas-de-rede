@@ -1,0 +1,28 @@
+{
+  "name": "CRM Franquias e Máquinas",
+  "short_name": "CRM Franquias",
+  "description": "Sistema de CRM para gestão de leads de franquias e máquinas de rede",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1e2d6b",
+  "theme_color": "#1e2d6b",
+  "orientation": "any",
+  "lang": "pt-BR",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "screenshots": []
+}

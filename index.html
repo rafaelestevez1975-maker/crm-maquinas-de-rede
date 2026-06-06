@@ -2,8 +2,23 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CRM — Máquinas de Rede</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>CRM Franquias e Máquinas</title>
+
+<!-- PWA -->
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#1e2d6b">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CRM Franquias">
+<link rel="apple-touch-icon" href="/icons/icon.svg">
+<link rel="icon" type="image/svg+xml" href="/icons/icon.svg">
+
+<!-- SEO -->
+<meta name="description" content="CRM para gestão de leads de franquias e máquinas de rede">
+<meta name="application-name" content="CRM Franquias e Máquinas">
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -261,7 +276,7 @@ tr:hover td { background:#fafbff; }
   <div class="login-card">
     <div class="login-logo">
       <div class="login-logo-icon">🖧</div>
-      <h1>CRM Máquinas</h1>
+      <h1>CRM Franquias e Máquinas</h1>
       <p>Faça login para continuar</p>
     </div>
     <div class="login-field">
@@ -285,8 +300,8 @@ tr:hover td { background:#fafbff; }
   <div class="sidebar-logo">
     <div class="logo-icon">🖧</div>
     <div>
-      <div class="logo-text">CRM Máquinas</div>
-      <div class="logo-sub">Rede de Vendas</div>
+      <div class="logo-text">CRM Franquias</div>
+      <div class="logo-sub">e Máquinas</div>
     </div>
   </div>
   <nav class="sidebar-nav">
@@ -1348,6 +1363,56 @@ function showPreviewStep() {
   document.getElementById('preview-tbody').innerHTML = preview.map(r=>'<tr>'+CRM_FIELDS.filter(f=>mapping[f.key]!==undefined).map(f=>`<td>${r[f.key]||''}</td>`).join('')+'</tr>').join('');
   window._importMapping = mapping;
 }
+
+// ─── PWA SERVICE WORKER ──────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(reg => console.log('[PWA] Service Worker registrado:', reg.scope))
+      .catch(err => console.warn('[PWA] SW falhou:', err));
+  });
+}
+
+// ─── PWA INSTALL PROMPT ──────────────────────────────────────
+let deferredInstallPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  showInstallBanner();
+});
+
+function showInstallBanner() {
+  if (document.getElementById('pwa-banner')) return;
+  const banner = document.createElement('div');
+  banner.id = 'pwa-banner';
+  banner.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#1e2d6b;color:#fff;padding:14px 18px;border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,.3);display:flex;align-items:center;gap:12px;z-index:8888;font-size:13px;font-weight:600;max-width:320px;';
+  banner.innerHTML = `
+    <span style="font-size:22px;">📲</span>
+    <div style="flex:1;">
+      <div style="font-weight:800;margin-bottom:2px;">Instalar CRM</div>
+      <div style="opacity:.7;font-size:11px;">Acesse como app no seu dispositivo</div>
+    </div>
+    <button onclick="installPWA()" style="background:#00c2ff;color:#000;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;">Instalar</button>
+    <button onclick="document.getElementById('pwa-banner').remove()" style="background:none;border:none;color:rgba(255,255,255,.5);font-size:18px;cursor:pointer;padding:0 2px;">×</button>
+  `;
+  document.body.appendChild(banner);
+}
+
+async function installPWA() {
+  if (!deferredInstallPrompt) return;
+  deferredInstallPrompt.prompt();
+  const { outcome } = await deferredInstallPrompt.userChoice;
+  deferredInstallPrompt = null;
+  const banner = document.getElementById('pwa-banner');
+  if (banner) banner.remove();
+  if (outcome === 'accepted') toast('✅ App instalado com sucesso!');
+}
+
+window.addEventListener('appinstalled', () => {
+  const banner = document.getElementById('pwa-banner');
+  if (banner) banner.remove();
+  toast('✅ CRM instalado como app!');
+});
 
 async function runImport() {
   document.getElementById('imp-btn-next').style.display='none';
