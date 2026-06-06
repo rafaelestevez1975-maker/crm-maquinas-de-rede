@@ -19,6 +19,23 @@
 }
 body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
 
+/* LOGIN */
+#login-screen { display:none; position:fixed; inset:0; background:linear-gradient(135deg,#1e2d6b 0%,#0d47a1 50%,#006064 100%); z-index:9999; align-items:center; justify-content:center; }
+#login-screen.active { display:flex; }
+.login-card { background:#fff; border-radius:20px; padding:44px 40px; width:100%; max-width:400px; box-shadow:0 25px 60px rgba(0,0,0,.3); }
+.login-logo { text-align:center; margin-bottom:32px; }
+.login-logo-icon { width:60px; height:60px; background:linear-gradient(135deg,#00c2ff,#0077ff); border-radius:16px; display:inline-flex; align-items:center; justify-content:center; font-size:28px; margin-bottom:12px; }
+.login-logo h1 { font-size:22px; font-weight:900; color:#1e2d6b; }
+.login-logo p { font-size:13px; color:#94a3b8; margin-top:4px; }
+.login-field { margin-bottom:18px; }
+.login-field label { display:block; font-size:12px; font-weight:700; color:#475569; margin-bottom:6px; text-transform:uppercase; letter-spacing:.5px; }
+.login-field input { width:100%; padding:12px 16px; border:2px solid #e2e8f0; border-radius:10px; font-size:14px; color:#0f172a; outline:none; transition:.2s; }
+.login-field input:focus { border-color:#3f5bd6; box-shadow:0 0 0 3px rgba(63,91,214,.12); }
+.login-btn { width:100%; padding:13px; background:linear-gradient(135deg,#3f5bd6,#1e2d6b); color:#fff; border:none; border-radius:10px; font-size:15px; font-weight:800; cursor:pointer; transition:.2s; margin-top:8px; }
+.login-btn:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(63,91,214,.4); }
+.login-error { background:#fee2e2; color:#dc2626; border-radius:8px; padding:10px 14px; font-size:13px; font-weight:600; margin-top:14px; display:none; }
+.login-error.show { display:block; }
+
 /* SIDEBAR */
 .sidebar { width: var(--sidebar-w); background: linear-gradient(180deg,var(--primary) 0%,#162057 100%); color: #e2e8f0; display: flex; flex-direction: column; position: fixed; top:0; left:0; bottom:0; z-index:200; }
 .sidebar-logo { padding: 22px 20px 18px; display: flex; align-items: center; gap: 11px; border-bottom: 1px solid rgba(255,255,255,.08); }
@@ -32,7 +49,13 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); co
 .nav-icon { font-size:17px; width:20px; text-align:center; flex-shrink:0; }
 .nav-badge { margin-left:auto; background:var(--accent); color:var(--primary); font-size:10px; font-weight:800; border-radius:99px; padding:2px 7px; }
 .sidebar-section { padding:6px 12px 4px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:rgba(255,255,255,.3); margin-top:10px; }
-.sidebar-footer { padding:14px; border-top:1px solid rgba(255,255,255,.08); font-size:11px; color:rgba(255,255,255,.3); text-align:center; }
+.sidebar-user { padding:14px 16px; border-top:1px solid rgba(255,255,255,.08); display:flex; align-items:center; gap:10px; }
+.sidebar-user-avatar { width:34px; height:34px; border-radius:50%; background:linear-gradient(135deg,var(--accent),#0077ff); display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:800; color:#fff; flex-shrink:0; }
+.sidebar-user-info { flex:1; min-width:0; }
+.sidebar-user-name { font-size:12px; font-weight:700; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.sidebar-user-role { font-size:10px; color:rgba(255,255,255,.4); }
+.sidebar-logout { color:rgba(255,255,255,.4); cursor:pointer; font-size:16px; padding:4px; border-radius:6px; transition:.15s; }
+.sidebar-logout:hover { color:#fff; background:rgba(255,255,255,.1); }
 
 /* MAIN */
 .main-wrap { margin-left:var(--sidebar-w); flex:1; display:flex; flex-direction:column; min-height:100vh; }
@@ -59,6 +82,8 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); co
 .btn-sm { padding:5px 11px; font-size:11px; }
 .btn-danger { background:#fee2e2; color:var(--danger); }
 .btn-danger:hover { background:var(--danger); color:#fff; }
+.btn-success { background:#d1fae5; color:#059669; }
+.btn-success:hover { background:#059669; color:#fff; }
 
 /* PAGES */
 .page { display:none; flex-direction:column; gap:24px; padding:28px; flex:1; }
@@ -99,868 +124,1253 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); co
 .recent-info { flex:1; min-width:0; }
 .recent-name  { font-size:13px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .recent-phone { font-size:11px; color:var(--text-3); }
-.status-dot  { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
-.status-pill { display:inline-flex; align-items:center; gap:5px; padding:3px 9px; border-radius:99px; font-size:11px; font-weight:700; }
+.recent-tag { font-size:10px; font-weight:700; padding:3px 8px; border-radius:6px; white-space:nowrap; }
 
 /* KANBAN */
-.kanban-wrap { overflow-x:auto; padding-bottom:12px; }
-.kanban-wrap::-webkit-scrollbar { height:5px; }
-.kanban-wrap::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
-.kanban-board { display:flex; gap:14px; align-items:flex-start; width:max-content; }
-.k-col { width:240px; background:#f8fafc; border-radius:var(--radius); border:1px solid var(--border); display:flex; flex-direction:column; }
-.k-col-head { padding:13px 14px; display:flex; align-items:center; gap:8px; border-bottom:1px solid var(--border); }
-.k-col-dot  { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
-.k-col-name { font-size:12px; font-weight:800; flex:1; color:var(--text); }
-.k-col-cnt  { background:white; border:1px solid var(--border); border-radius:99px; padding:1px 8px; font-size:11px; font-weight:700; color:var(--text-3); }
-.k-cards { padding:10px; display:flex; flex-direction:column; gap:9px; min-height:56px; }
-.k-card { background:white; border-radius:10px; border:1px solid var(--border); padding:12px 13px; cursor:pointer; transition:all .18s; box-shadow:0 1px 4px rgba(0,0,0,.05); }
-.k-card:hover { transform:translateY(-2px); box-shadow:0 6px 18px rgba(0,0,0,.09); border-color:#c7d2fe; }
-.k-card-equip { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.4px; margin-bottom:6px; display:inline-flex; align-items:center; gap:4px; padding:2px 7px; border-radius:4px; }
-.k-card-name  { font-size:13px; font-weight:800; margin-bottom:3px; }
-.k-card-phone { font-size:11px; color:var(--text-3); }
-.k-card-note  { font-size:11px; color:var(--text-2); margin-top:8px; padding-top:8px; border-top:1px solid var(--border); line-height:1.45; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
-.k-card-foot  { display:flex; align-items:center; justify-content:space-between; margin-top:9px; padding-top:8px; border-top:1px solid #f1f5f9; }
-.k-card-date  { font-size:10px; color:var(--text-3); }
-.k-empty { padding:20px; text-align:center; font-size:11px; color:var(--text-3); }
+.kanban-wrap { display:flex; gap:16px; overflow-x:auto; padding-bottom:16px; align-items:flex-start; }
+.kanban-col { background:var(--bg); border-radius:var(--radius); min-width:256px; max-width:256px; display:flex; flex-direction:column; gap:0; border:1.5px solid var(--border); }
+.kanban-col-hd { padding:14px 16px 12px; display:flex; align-items:center; gap:8px; border-bottom:2px solid transparent; }
+.kanban-col-title { font-size:13px; font-weight:800; flex:1; }
+.kanban-col-count { font-size:11px; font-weight:700; background:rgba(0,0,0,.07); border-radius:99px; padding:2px 8px; }
+.kanban-cards { padding:10px 10px 12px; display:flex; flex-direction:column; gap:9px; min-height:60px; }
+.k-card { background:var(--card); border-radius:10px; padding:12px 14px; box-shadow:0 1px 4px rgba(0,0,0,.07); cursor:pointer; transition:box-shadow .15s, transform .15s; border-left:3px solid transparent; }
+.k-card:hover { box-shadow:0 4px 14px rgba(0,0,0,.12); transform:translateY(-1px); }
+.k-card-name  { font-size:13px; font-weight:700; margin-bottom:4px; }
+.k-card-phone { font-size:11px; color:var(--text-3); margin-bottom:6px; }
+.k-card-foot  { display:flex; align-items:center; justify-content:space-between; }
+.k-equip-dot  { width:8px; height:8px; border-radius:50%; display:inline-block; }
+.k-equip-label{ font-size:10px; color:var(--text-3); font-weight:600; }
 
 /* LIST */
-.list-card { background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; }
-.list-table { width:100%; border-collapse:collapse; }
-.list-table th { background:#f8fafc; padding:11px 16px; text-align:left; font-size:11px; font-weight:700; color:var(--text-3); text-transform:uppercase; letter-spacing:.5px; border-bottom:1px solid var(--border); }
-.list-table td { padding:12px 16px; font-size:13px; border-bottom:1px solid #f8fafc; vertical-align:middle; }
-.list-table tr:last-child td { border-bottom:none; }
-.list-table tr:hover td { background:#fafbff; }
-.td-name  { font-weight:700; }
-.td-email { font-size:11px; color:var(--text-3); }
-.td-phone { color:var(--text-2); white-space:nowrap; }
-.td-note  { max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--text-3); font-size:12px; }
-.td-date  { color:var(--text-3); font-size:11px; white-space:nowrap; }
-.no-data  { text-align:center; padding:50px; color:var(--text-3); font-size:13px; }
+.list-table-wrap { overflow-x:auto; }
+table { width:100%; border-collapse:collapse; }
+th { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--text-3); padding:10px 14px; text-align:left; border-bottom:2px solid var(--border); background:#fafbff; white-space:nowrap; }
+td { padding:12px 14px; border-bottom:1px solid #f1f4fb; font-size:13px; vertical-align:middle; }
+tr:hover td { background:#fafbff; }
+.status-dot { width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:5px; }
 
 /* MODAL */
-.overlay { position:fixed; inset:0; background:rgba(15,23,42,.5); backdrop-filter:blur(5px); z-index:1000; display:flex; align-items:center; justify-content:center; padding:20px; opacity:0; pointer-events:none; transition:opacity .2s; }
-.overlay.open { opacity:1; pointer-events:all; }
-.modal { background:var(--card); border-radius:18px; width:100%; max-width:530px; box-shadow:0 24px 64px rgba(0,0,0,.22); transform:translateY(18px) scale(.98); transition:transform .22s; max-height:92vh; overflow-y:auto; }
-.overlay.open .modal { transform:translateY(0) scale(1); }
-.modal-head { padding:22px 26px 16px; display:flex; align-items:center; gap:14px; border-bottom:1px solid var(--border); }
-.modal-head-icon { width:40px; height:40px; border-radius:11px; background:linear-gradient(135deg,var(--primary-light),var(--primary)); display:flex; align-items:center; justify-content:center; font-size:19px; color:white; flex-shrink:0; }
-.modal-title { font-size:17px; font-weight:800; }
-.modal-sub   { font-size:12px; color:var(--text-3); }
-.modal-close { margin-left:auto; background:var(--bg); border:none; width:32px; height:32px; border-radius:8px; cursor:pointer; font-size:16px; color:var(--text-3); display:flex; align-items:center; justify-content:center; transition:.15s; }
-.modal-close:hover { background:#fee2e2; color:var(--danger); }
-.modal-body { padding:22px 26px; display:flex; flex-direction:column; gap:16px; }
-.modal-foot { padding:14px 26px; border-top:1px solid var(--border); display:flex; gap:10px; justify-content:flex-end; }
-.frow { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
-.fg { display:flex; flex-direction:column; gap:5px; }
-.fg.full { grid-column:1/-1; }
-label { font-size:12px; font-weight:700; color:var(--text-2); }
-input, select, textarea { padding:9px 13px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-size:13px; font-family:inherit; color:var(--text); background:white; outline:none; transition:.15s; }
-input:focus, select:focus, textarea:focus { border-color:var(--primary-light); box-shadow:0 0 0 3px rgba(63,91,214,.1); }
-textarea { resize:vertical; min-height:78px; }
-.equip-item { display:flex; align-items:center; gap:11px; padding:11px 14px; background:var(--bg); border-radius:10px; border:1px solid var(--border); }
-.equip-color-dot { width:20px; height:20px; border-radius:50%; flex-shrink:0; }
-.equip-name-text { flex:1; font-weight:700; font-size:13px; }
-.equip-leads-cnt { font-size:11px; color:var(--text-3); }
+.overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:500; align-items:center; justify-content:center; }
+.overlay.open { display:flex; }
+.modal { background:var(--card); border-radius:var(--radius); padding:32px; width:100%; max-width:500px; box-shadow:0 25px 60px rgba(0,0,0,.2); max-height:90vh; overflow-y:auto; }
+.modal h2 { font-size:18px; font-weight:900; margin-bottom:24px; color:var(--text); }
+.form-group { margin-bottom:16px; }
+.form-group label { display:block; font-size:12px; font-weight:700; color:var(--text-2); margin-bottom:6px; text-transform:uppercase; letter-spacing:.5px; }
+.form-group input, .form-group select, .form-group textarea { width:100%; padding:10px 14px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-size:13px; color:var(--text); outline:none; transition:.15s; background:var(--card); font-family:inherit; }
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color:var(--primary-light); box-shadow:0 0 0 3px rgba(63,91,214,.1); }
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.modal-foot { display:flex; gap:10px; justify-content:flex-end; margin-top:24px; }
 
-/* IMPORT */
-.import-steps { display:flex; align-items:center; gap:0; margin-bottom:22px; }
-.import-step { display:flex; align-items:center; gap:8px; font-size:12px; font-weight:700; color:var(--text-3); flex:1; }
-.import-step.active { color:var(--primary-light); }
-.import-step.done   { color:var(--success); }
-.step-num { width:26px; height:26px; border-radius:50%; background:var(--bg); border:2px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; flex-shrink:0; transition:.2s; }
-.import-step.active .step-num { background:var(--primary-light); border-color:var(--primary-light); color:#fff; }
-.import-step.done   .step-num { background:var(--success); border-color:var(--success); color:#fff; }
-.step-line { flex:1; height:2px; background:var(--border); margin:0 6px; }
-.step-line.done { background:var(--success); }
-.drop-zone { border:2.5px dashed var(--border); border-radius:var(--radius); padding:40px 24px; text-align:center; cursor:pointer; transition:all .2s; background:var(--bg); }
-.drop-zone:hover, .drop-zone.dragover { border-color:var(--primary-light); background:#eef1fd; }
-.drop-zone .dz-icon  { font-size:42px; margin-bottom:12px; line-height:1; }
-.drop-zone .dz-title { font-size:15px; font-weight:800; color:var(--text); margin-bottom:6px; }
-.drop-zone .dz-sub   { font-size:12px; color:var(--text-3); }
-.drop-zone .dz-types { font-size:11px; color:var(--text-3); margin-top:10px; }
-.map-table { width:100%; border-collapse:collapse; font-size:13px; }
-.map-table th { background:#f8fafc; padding:9px 12px; text-align:left; font-size:11px; font-weight:700; color:var(--text-3); text-transform:uppercase; letter-spacing:.5px; border-bottom:1px solid var(--border); }
-.map-table td { padding:8px 12px; border-bottom:1px solid #f1f5f9; vertical-align:middle; }
-.map-table td select { padding:6px 10px; font-size:12px; width:100%; }
-.map-sample { font-size:11px; color:var(--text-3); max-width:160px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.preview-wrap { overflow-x:auto; border-radius:8px; border:1px solid var(--border); }
-.preview-table { width:100%; border-collapse:collapse; font-size:12px; }
-.preview-table th { background:var(--primary); color:#fff; padding:8px 12px; text-align:left; font-weight:700; white-space:nowrap; }
-.preview-table td { padding:7px 12px; border-bottom:1px solid #f1f5f9; white-space:nowrap; }
-.preview-table tr:last-child td { border-bottom:none; }
-.import-info { background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:12px 16px; font-size:12px; color:#1e40af; display:flex; align-items:flex-start; gap:8px; }
+/* EQUIP MANAGE */
+.equip-list { display:flex; flex-direction:column; gap:10px; padding:18px 22px; }
+.equip-item { display:flex; align-items:center; gap:14px; padding:13px 16px; border:1.5px solid var(--border); border-radius:10px; background:var(--bg); }
+.equip-color-dot { width:16px; height:16px; border-radius:50%; flex-shrink:0; }
+.equip-label-text { flex:1; font-size:14px; font-weight:700; }
+.equip-actions { display:flex; gap:7px; }
 
-/* LOADER */
-.loader-overlay { position:fixed; inset:0; background:rgba(15,23,42,.55); backdrop-filter:blur(4px); z-index:2000; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; opacity:0; pointer-events:none; transition:opacity .2s; }
-.loader-overlay.show { opacity:1; pointer-events:all; }
-.spinner { width:44px; height:44px; border:4px solid rgba(255,255,255,.2); border-top-color:#fff; border-radius:50%; animation:spin .7s linear infinite; }
-@keyframes spin { to { transform:rotate(360deg); } }
-.loader-text { color:#fff; font-size:14px; font-weight:600; }
+/* IMPORT MODAL */
+.import-step { display:none; }
+.import-step.active { display:block; }
+.drop-zone { border:2.5px dashed var(--border); border-radius:var(--radius); padding:44px; text-align:center; cursor:pointer; transition:all .2s; background:#fafbff; }
+.drop-zone:hover, .drop-zone.drag { border-color:var(--primary-light); background:#eef1fc; }
+.drop-zone-icon { font-size:40px; margin-bottom:12px; }
+.drop-zone-text { font-size:15px; font-weight:700; color:var(--text); }
+.drop-zone-sub  { font-size:12px; color:var(--text-3); margin-top:4px; }
+.map-row { display:grid; grid-template-columns:1fr 24px 1fr; align-items:center; gap:10px; margin-bottom:10px; }
+.map-col-label { font-size:12px; font-weight:700; color:var(--text-2); padding:8px 12px; background:var(--bg); border-radius:6px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.preview-table-wrap { max-height:260px; overflow-y:auto; border:1.5px solid var(--border); border-radius:var(--radius-sm); }
+.import-progress { text-align:center; padding:20px; }
+.progress-bar-wrap { background:#f1f4fb; border-radius:99px; height:10px; margin:16px 0 8px; overflow:hidden; }
+.progress-bar { height:100%; background:linear-gradient(90deg,var(--primary-light),var(--accent)); border-radius:99px; transition:width .4s; }
 
-/* SYNC badge */
-.sync-badge { display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:700; padding:4px 10px; border-radius:99px; }
-.sync-badge.ok      { background:#d1fae5; color:#065f46; }
-.sync-badge.syncing { background:#fef3c7; color:#92400e; }
-.sync-badge.error   { background:#fee2e2; color:#991b1b; }
+/* USERS PAGE */
+.users-list { display:flex; flex-direction:column; gap:10px; padding:18px 22px; }
+.user-item { display:flex; align-items:center; gap:14px; padding:14px 16px; border:1.5px solid var(--border); border-radius:10px; background:var(--bg); }
+.user-avatar-sm { width:38px; height:38px; border-radius:50%; background:linear-gradient(135deg,var(--accent),#0077ff); display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:800; color:#fff; flex-shrink:0; }
+.user-info { flex:1; min-width:0; }
+.user-name { font-size:14px; font-weight:700; }
+.user-email { font-size:12px; color:var(--text-3); }
+.user-badge { font-size:10px; font-weight:700; padding:3px 9px; border-radius:99px; }
+.badge-admin { background:#dbeafe; color:#1d4ed8; }
+.badge-user  { background:#f1f5f9; color:#475569; }
+.badge-inactive { background:#fee2e2; color:#dc2626; }
+
+/* REPORTS */
+.report-filters { display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap; padding:16px 22px; background:var(--bg); border-bottom:1px solid var(--border); }
+.report-filters label { font-size:11px; font-weight:700; color:var(--text-2); display:block; margin-bottom:5px; text-transform:uppercase; letter-spacing:.4px; }
+.report-filters input[type=date], .report-filters select { padding:8px 12px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-size:13px; color:var(--text); outline:none; background:#fff; }
+.report-table-wrap { overflow-x:auto; max-height:60vh; overflow-y:auto; }
+.report-empty { text-align:center; padding:60px 20px; color:var(--text-3); }
+.report-empty-icon { font-size:44px; margin-bottom:12px; }
+
+/* BADGE */
+.badge { font-size:10px; font-weight:700; padding:3px 9px; border-radius:6px; display:inline-flex; align-items:center; gap:4px; }
+
+/* STATUS colors */
+.s-novo      { background:#dbeafe; color:#1d4ed8; }
+.s-contato   { background:#fef3c7; color:#b45309; }
+.s-proposta  { background:#ede9fe; color:#6d28d9; }
+.s-negociando{ background:#d1fae5; color:#065f46; }
+.s-fechado   { background:#bbf7d0; color:#14532d; }
+.s-perdido   { background:#fee2e2; color:#991b1b; }
+.s-sem_int   { background:#f1f5f9; color:#475569; }
+.s-nao_ret   { background:#ffedd5; color:#9a3412; }
 
 /* TOAST */
-.toast { position:fixed; bottom:22px; right:22px; background:#1e293b; color:white; padding:11px 18px; border-radius:10px; font-size:13px; font-weight:600; z-index:9999; transform:translateY(70px); opacity:0; transition:all .25s; display:flex; align-items:center; gap:8px; box-shadow:0 8px 24px rgba(0,0,0,.2); }
-.toast.show { transform:translateY(0); opacity:1; }
-.toast.success { border-left:4px solid var(--success); }
-.toast.error   { border-left:4px solid var(--danger); }
+#toast { position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(60px); background:#1e2d6b; color:#fff; padding:11px 22px; border-radius:10px; font-size:13px; font-weight:700; z-index:9000; transition:.3s; opacity:0; white-space:nowrap; }
+#toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
-@media (max-width:768px) {
-  .sidebar { display:none; } .main-wrap { margin-left:0; }
-  .dash-grid, .dash-grid-3 { grid-template-columns:1fr; }
-  .frow { grid-template-columns:1fr; } .page { padding:16px; }
+/* LOADING */
+.loading-overlay { display:none; position:fixed; inset:0; background:rgba(255,255,255,.75); z-index:8000; align-items:center; justify-content:center; flex-direction:column; gap:14px; }
+.loading-overlay.active { display:flex; }
+.spinner { width:42px; height:42px; border:4px solid #e2e8f0; border-top-color:var(--primary-light); border-radius:50%; animation:spin .7s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }
+
+/* EMPTY */
+.empty-state { text-align:center; padding:60px 20px; }
+.empty-icon  { font-size:48px; margin-bottom:14px; }
+.empty-title { font-size:16px; font-weight:800; margin-bottom:6px; }
+.empty-sub   { font-size:13px; color:var(--text-3); }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width:6px; height:6px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:99px; }
+
+/* HIDDEN */
+.hidden { display:none !important; }
+
+/* COLOR SWATCH */
+.color-swatch { display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
+.swatch { width:28px; height:28px; border-radius:50%; cursor:pointer; border:3px solid transparent; transition:.15s; }
+.swatch.selected { border-color:#fff; box-shadow:0 0 0 2px var(--primary); }
+
+@media(max-width:768px){
+  .sidebar { transform:translateX(-100%); }
+  .main-wrap { margin-left:0; }
+  .dash-grid, .dash-grid-3, .form-row { grid-template-columns:1fr; }
+  .kanban-wrap { flex-direction:column; }
+  .kanban-col { min-width:100%; max-width:100%; }
 }
 </style>
 </head>
 <body>
 
-<!-- LOADER -->
-<div class="loader-overlay" id="loaderOverlay">
-  <div class="spinner"></div>
-  <div class="loader-text" id="loaderText">Conectando ao banco de dados...</div>
+<!-- LOGIN SCREEN -->
+<div id="login-screen" class="active">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="login-logo-icon">🖧</div>
+      <h1>CRM Máquinas</h1>
+      <p>Faça login para continuar</p>
+    </div>
+    <div class="login-field">
+      <label>E-mail</label>
+      <input type="email" id="login-email" placeholder="seu@email.com" autocomplete="username">
+    </div>
+    <div class="login-field">
+      <label>Senha</label>
+      <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="login-btn" onclick="doLogin()">Entrar</button>
+    <div class="login-error" id="login-error"></div>
+  </div>
 </div>
+
+<!-- APP -->
+<div id="app-wrap" class="hidden" style="display:flex;width:100%;">
 
 <!-- SIDEBAR -->
 <aside class="sidebar">
   <div class="sidebar-logo">
-    <div class="logo-icon">📡</div>
+    <div class="logo-icon">🖧</div>
     <div>
-      <div class="logo-text">CRM Rede</div>
-      <div class="logo-sub">Máquinas de Rede</div>
+      <div class="logo-text">CRM Máquinas</div>
+      <div class="logo-sub">Rede de Vendas</div>
     </div>
   </div>
   <nav class="sidebar-nav">
     <div class="sidebar-section">Principal</div>
-    <div class="nav-item active" onclick="goPage('dashboard')"><span class="nav-icon">📊</span> Dashboard</div>
-    <div class="nav-item" onclick="goPage('funil')"><span class="nav-icon">🎯</span> Funil de Vendas <span class="nav-badge" id="nb-funil">0</span></div>
-    <div class="nav-item" onclick="goPage('lista')"><span class="nav-icon">📋</span> Lista de Leads <span class="nav-badge" id="nb-lista">0</span></div>
-    <div class="sidebar-section" style="margin-top:16px;">Configurações</div>
-    <div class="nav-item" onclick="openEquipModal()"><span class="nav-icon">⚙️</span> Equipamentos</div>
+    <div class="nav-item active" data-page="dashboard" onclick="navTo('dashboard',this)">
+      <span class="nav-icon">📊</span> Dashboard
+    </div>
+    <div class="nav-item" data-page="funnel" onclick="navTo('funnel',this)">
+      <span class="nav-icon">🔽</span> Funil
+    </div>
+    <div class="nav-item" data-page="list" onclick="navTo('list',this)">
+      <span class="nav-icon">📋</span> Lista
+    </div>
+
+    <div class="sidebar-section">Cadastros</div>
+    <div class="nav-item" data-page="equipamentos" onclick="navTo('equipamentos',this)">
+      <span class="nav-icon">🔧</span> Equipamentos
+    </div>
+    <div class="nav-item admin-only hidden" data-page="usuarios" onclick="navTo('usuarios',this)">
+      <span class="nav-icon">👥</span> Usuários
+    </div>
+
+    <div class="sidebar-section admin-only hidden">Relatórios</div>
+    <div class="nav-item admin-only hidden" data-page="rel-atividade" onclick="navTo('rel-atividade',this)">
+      <span class="nav-icon">📝</span> Atividade
+    </div>
+    <div class="nav-item admin-only hidden" data-page="rel-logins" onclick="navTo('rel-logins',this)">
+      <span class="nav-icon">🔐</span> Logins
+    </div>
   </nav>
-  <div class="sidebar-footer">
-    <span class="sync-badge ok" id="syncBadge">☁ Conectado</span>
+  <div class="sidebar-user">
+    <div class="sidebar-user-avatar" id="sb-avatar">?</div>
+    <div class="sidebar-user-info">
+      <div class="sidebar-user-name" id="sb-name">—</div>
+      <div class="sidebar-user-role" id="sb-role">—</div>
+    </div>
+    <span class="sidebar-logout" title="Sair" onclick="doLogout()">⏻</span>
   </div>
 </aside>
 
 <!-- MAIN -->
 <div class="main-wrap">
-  <header class="topbar">
-    <div>
-      <div class="topbar-title" id="topTitle">Dashboard</div>
-      <div class="topbar-sub"   id="topSub">Visão geral do funil de vendas</div>
-    </div>
-    <div class="equip-chips" id="equipChips">
-      <div class="chip active" onclick="setFilter('all')">Todos</div>
-    </div>
-    <div class="search-wrap">
-      <span class="si">🔍</span>
-      <input type="text" id="searchInput" placeholder="Buscar lead..." oninput="renderAll()">
-    </div>
-    <button class="btn btn-ghost" onclick="openImportModal()" style="border-color:#22c55e40;color:#16a34a;">⬆ Importar Excel</button>
-    <button class="btn btn-primary" onclick="openLeadModal()">＋ Novo Lead</button>
-  </header>
 
-  <!-- DASHBOARD -->
-  <section class="page active" id="page-dashboard">
-    <div class="kpi-row" id="kpiRow"></div>
-    <div class="dash-grid">
-      <div class="card">
-        <div class="card-header"><div><div class="card-title">Distribuição por Status</div><div class="card-sub">Leads em cada etapa</div></div></div>
-        <div class="card-body" style="display:flex;align-items:center;justify-content:center;height:260px;"><canvas id="chartDonut" style="max-height:240px;"></canvas></div>
-      </div>
-      <div class="card">
-        <div class="card-header"><div><div class="card-title">Leads por Equipamento</div><div class="card-sub">Total por produto</div></div></div>
-        <div class="card-body" style="height:260px;display:flex;align-items:center;"><canvas id="chartBar" style="max-height:220px;width:100%;"></canvas></div>
-      </div>
-    </div>
-    <div class="dash-grid-3">
-      <div class="card">
-        <div class="card-header"><div><div class="card-title">Funil de Conversão</div><div class="card-sub">Progressão por etapa</div></div></div>
-        <div class="funnel-visual" id="funnelViz"></div>
-      </div>
-      <div class="card">
-        <div class="card-header"><div><div class="card-title">Últimos Leads</div><div class="card-sub">Adicionados recentemente</div></div><button class="btn btn-ghost btn-sm" onclick="goPage('lista')">Ver todos →</button></div>
-        <div class="recent-list" id="recentList"></div>
-      </div>
-    </div>
-  </section>
+<!-- TOPBAR -->
+<div class="topbar">
+  <div>
+    <div class="topbar-title" id="topbar-title">Dashboard</div>
+    <div class="topbar-sub" id="topbar-sub">Visão geral</div>
+  </div>
+  <div class="search-wrap" id="search-wrap">
+    <span class="si">🔍</span>
+    <input type="search" id="search-input" placeholder="Buscar lead…" oninput="renderList();renderKanban()">
+  </div>
+  <div class="equip-chips" id="equip-filter-chips"></div>
+  <button class="btn btn-primary" id="btn-add-lead" onclick="openLeadModal()">＋ Novo Lead</button>
+  <button class="btn btn-ghost btn-sm" id="btn-import" onclick="openImport()">⬆ Importar</button>
+  <div id="view-toggle" style="display:flex;gap:6px;">
+    <button class="btn btn-ghost btn-sm" id="btn-kanban" onclick="setView('kanban')">🗂 Kanban</button>
+    <button class="btn btn-ghost btn-sm" id="btn-listv" onclick="setView('list')">☰ Lista</button>
+  </div>
+</div>
 
-  <!-- FUNIL -->
-  <section class="page" id="page-funil">
-    <div class="kanban-wrap"><div class="kanban-board" id="kanbanBoard"></div></div>
-  </section>
+<!-- ── DASHBOARD ── -->
+<div class="page active" id="page-dashboard">
+  <div class="kpi-row" id="kpi-row"></div>
+  <div class="dash-grid">
+    <div class="card">
+      <div class="card-header"><div><div class="card-title">Status dos Leads</div><div class="card-sub">Distribuição por status</div></div></div>
+      <div class="card-body" style="display:flex;justify-content:center;align-items:center;min-height:220px;"><canvas id="chartStatus" height="200"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div><div class="card-title">Leads por Equipamento</div><div class="card-sub">Distribuição por tipo</div></div></div>
+      <div class="card-body" style="display:flex;justify-content:center;align-items:center;min-height:220px;"><canvas id="chartEquip" height="200"></canvas></div>
+    </div>
+  </div>
+  <div class="dash-grid-3">
+    <div class="card">
+      <div class="card-header"><div><div class="card-title">Status × Equipamento</div><div class="card-sub">Composição empilhada</div></div></div>
+      <div class="card-body"><canvas id="chartBar" height="140"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div><div class="card-title">Recentes</div></div></div>
+      <div class="recent-list" id="recent-list"></div>
+    </div>
+  </div>
+</div>
 
-  <!-- LISTA -->
-  <section class="page" id="page-lista">
-    <div class="list-card">
-      <table class="list-table">
-        <thead><tr><th>Nome</th><th>Telefone</th><th>Equipamento</th><th>Status</th><th>Anotação</th><th>Data</th><th></th></tr></thead>
-        <tbody id="listBody"></tbody>
+<!-- ── FUNIL ── -->
+<div class="page" id="page-funnel">
+  <div class="card">
+    <div class="card-header">
+      <div><div class="card-title">Funil de Vendas</div><div class="card-sub">Clique em uma etapa para filtrar</div></div>
+      <div class="equip-chips" id="funnel-equip-chips"></div>
+    </div>
+    <div class="funnel-visual" id="funnel-visual"></div>
+  </div>
+  <div class="card">
+    <div class="card-header"><div class="card-title" id="funnel-detail-title">Todos os Leads</div></div>
+    <div class="list-table-wrap"><table><thead><tr><th>Nome</th><th>Telefone</th><th>Equipamento</th><th>Status</th><th>Nota</th><th></th></tr></thead><tbody id="funnel-tbody"></tbody></table></div>
+  </div>
+</div>
+
+<!-- ── LIST (kanban+list) ── -->
+<div class="page" id="page-list">
+  <div id="kanban-view">
+    <div class="kanban-wrap" id="kanban-wrap"></div>
+  </div>
+  <div id="list-view" style="display:none;">
+    <div class="card list-table-wrap">
+      <table><thead><tr><th>Nome</th><th>Telefone</th><th>E-mail</th><th>Empresa</th><th>Equipamento</th><th>Status</th><th>Nota</th><th></th></tr></thead>
+      <tbody id="list-tbody"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- ── EQUIPAMENTOS ── -->
+<div class="page" id="page-equipamentos">
+  <div class="card">
+    <div class="card-header">
+      <div><div class="card-title">Equipamentos Cadastrados</div><div class="card-sub">Gerencie os tipos de equipamento</div></div>
+      <button class="btn btn-primary btn-sm" onclick="openEquipModal()">＋ Novo</button>
+    </div>
+    <div class="equip-list" id="equip-list"></div>
+  </div>
+</div>
+
+<!-- ── USUÁRIOS ── -->
+<div class="page" id="page-usuarios">
+  <div class="card">
+    <div class="card-header">
+      <div><div class="card-title">Usuários do Sistema</div><div class="card-sub">Gerencie acessos</div></div>
+      <button class="btn btn-primary btn-sm" onclick="openUserModal()">＋ Novo Usuário</button>
+    </div>
+    <div class="users-list" id="users-list"></div>
+  </div>
+</div>
+
+<!-- ── REL ATIVIDADE ── -->
+<div class="page" id="page-rel-atividade">
+  <div class="card">
+    <div class="card-header">
+      <div><div class="card-title">Relatório de Atividade</div><div class="card-sub">Todas as ações no sistema</div></div>
+      <button class="btn btn-ghost btn-sm" onclick="exportActivityCSV()">⬇ CSV</button>
+    </div>
+    <div class="report-filters">
+      <div>
+        <label>De</label>
+        <input type="date" id="act-from">
+      </div>
+      <div>
+        <label>Até</label>
+        <input type="date" id="act-to">
+      </div>
+      <div>
+        <label>Ação</label>
+        <select id="act-action">
+          <option value="">Todas</option>
+          <option value="Criou Lead">Criou Lead</option>
+          <option value="Editou Lead">Editou Lead</option>
+          <option value="Removeu Lead">Removeu Lead</option>
+          <option value="Criou Equipamento">Criou Equipamento</option>
+          <option value="Editou Equipamento">Editou Equipamento</option>
+          <option value="Removeu Equipamento">Removeu Equipamento</option>
+          <option value="Criou Usuário">Criou Usuário</option>
+        </select>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="loadActivityReport()">Filtrar</button>
+    </div>
+    <div class="report-table-wrap">
+      <table>
+        <thead><tr><th>Data/Hora</th><th>Usuário</th><th>Ação</th><th>Entidade</th><th>Nome</th><th>Detalhes</th></tr></thead>
+        <tbody id="activity-tbody"></tbody>
       </table>
     </div>
-  </section>
+  </div>
 </div>
+
+<!-- ── REL LOGINS ── -->
+<div class="page" id="page-rel-logins">
+  <div class="card">
+    <div class="card-header">
+      <div><div class="card-title">Relatório de Logins</div><div class="card-sub">Acessos ao sistema</div></div>
+      <button class="btn btn-ghost btn-sm" onclick="exportLoginsCSV()">⬇ CSV</button>
+    </div>
+    <div class="report-filters">
+      <div>
+        <label>De</label>
+        <input type="date" id="log-from">
+      </div>
+      <div>
+        <label>Até</label>
+        <input type="date" id="log-to">
+      </div>
+      <div>
+        <label>Usuário</label>
+        <input type="text" id="log-user" placeholder="Nome ou e-mail..." style="padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13px;outline:none;">
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="loadLoginsReport()">Filtrar</button>
+    </div>
+    <div class="report-table-wrap">
+      <table>
+        <thead><tr><th>Data/Hora</th><th>Usuário</th><th>E-mail</th></tr></thead>
+        <tbody id="logins-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+</div><!-- /main-wrap -->
+</div><!-- /app-wrap -->
+
+<!-- LOADING -->
+<div class="loading-overlay" id="loading"><div class="spinner"></div><div style="font-size:13px;color:var(--text-2);font-weight:600;">Carregando…</div></div>
+<div id="toast"></div>
 
 <!-- MODAL LEAD -->
-<div class="overlay" id="leadModal">
+<div class="overlay" id="modal-lead">
   <div class="modal">
-    <div class="modal-head">
-      <div class="modal-head-icon">👤</div>
-      <div><div class="modal-title" id="leadModalTitle">Novo Lead</div><div class="modal-sub">Preencha os dados do contato</div></div>
-      <button class="modal-close" onclick="closeLeadModal()">✕</button>
+    <h2 id="modal-lead-title">Novo Lead</h2>
+    <div class="form-row">
+      <div class="form-group"><label>Nome *</label><input id="f-name" placeholder="Nome completo"></div>
+      <div class="form-group"><label>Telefone</label><input id="f-phone" placeholder="(00) 00000-0000"></div>
     </div>
-    <div class="modal-body">
-      <input type="hidden" id="leadId">
-      <div class="frow">
-        <div class="fg"><label>Nome completo *</label><input type="text" id="leadName" placeholder="Ex: João Silva"></div>
-        <div class="fg"><label>Telefone *</label><input type="tel" id="leadPhone" placeholder="(00) 00000-0000" oninput="maskPhone(this)"></div>
-      </div>
-      <div class="frow">
-        <div class="fg"><label>Equipamento *</label><select id="leadEquip"></select></div>
-        <div class="fg"><label>Status *</label><select id="leadStatus"></select></div>
-      </div>
-      <div class="fg full"><label>E-mail</label><input type="email" id="leadEmail" placeholder="email@empresa.com"></div>
-      <div class="fg full"><label>Empresa</label><input type="text" id="leadCompany" placeholder="Nome da empresa"></div>
-      <div class="fg full"><label>Anotações</label><textarea id="leadNote" placeholder="Detalhes da conversa, próximos passos..."></textarea></div>
+    <div class="form-row">
+      <div class="form-group"><label>E-mail</label><input id="f-email" type="email" placeholder="email@exemplo.com"></div>
+      <div class="form-group"><label>Empresa</label><input id="f-company" placeholder="Nome da empresa"></div>
     </div>
+    <div class="form-row">
+      <div class="form-group"><label>Equipamento *</label>
+        <select id="f-equip"></select>
+      </div>
+      <div class="form-group"><label>Status *</label>
+        <select id="f-status">
+          <option value="novo">Novo</option>
+          <option value="contato">Contato Feito</option>
+          <option value="nao_ret">Não Retornou</option>
+          <option value="proposta">Proposta Enviada</option>
+          <option value="negociando">Negociando</option>
+          <option value="fechado">Fechado ✅</option>
+          <option value="perdido">Perdido ❌</option>
+          <option value="sem_int">Sem Interesse</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group"><label>Nota</label><textarea id="f-note" rows="3" placeholder="Observações…"></textarea></div>
     <div class="modal-foot">
       <button class="btn btn-ghost" onclick="closeLeadModal()">Cancelar</button>
-      <button class="btn btn-primary" onclick="saveLead()">💾 Salvar Lead</button>
+      <button class="btn btn-primary" onclick="saveLead()">Salvar</button>
     </div>
   </div>
 </div>
 
-<!-- MODAL EQUIPAMENTOS -->
-<div class="overlay" id="equipModal">
-  <div class="modal" style="max-width:440px;">
-    <div class="modal-head">
-      <div class="modal-head-icon">⚙️</div>
-      <div><div class="modal-title">Equipamentos</div><div class="modal-sub">Gerencie os produtos do CRM</div></div>
-      <button class="modal-close" onclick="closeEquipModal()">✕</button>
+<!-- MODAL EQUIP -->
+<div class="overlay" id="modal-equip">
+  <div class="modal" style="max-width:380px;">
+    <h2 id="modal-equip-title">Novo Equipamento</h2>
+    <div class="form-group"><label>Nome *</label><input id="eq-label" placeholder="Ex: Quanta Pro"></div>
+    <div class="form-group"><label>Cor</label>
+      <div class="color-swatch" id="color-swatch"></div>
+      <input type="color" id="eq-color" value="#1b5e20" style="margin-top:10px;width:50px;height:32px;cursor:pointer;border:none;background:none;">
     </div>
-    <div class="modal-body">
-      <div id="equipList" style="display:flex;flex-direction:column;gap:10px;"></div>
-      <div style="display:flex;gap:10px;margin-top:6px;">
-        <input type="text" id="newEquipName" placeholder="Nome do equipamento" style="flex:1;">
-        <input type="color" id="newEquipColor" value="#3f5bd6" style="width:44px;padding:4px;cursor:pointer;border-radius:8px;">
-        <button class="btn btn-primary" onclick="addEquip()">＋ Adicionar</button>
-      </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeEquipModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveEquip()">Salvar</button>
     </div>
-    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeEquipModal()">Fechar</button></div>
   </div>
 </div>
 
-<!-- MODAL IMPORTAR -->
-<div class="overlay" id="importModal">
-  <div class="modal" style="max-width:640px;">
-    <div class="modal-head">
-      <div class="modal-head-icon" style="background:linear-gradient(135deg,#22c55e,#16a34a);">📊</div>
-      <div><div class="modal-title">Importar Leads via Excel</div><div class="modal-sub">Carregue uma planilha .xls ou .xlsx</div></div>
-      <button class="modal-close" onclick="closeImportModal()">✕</button>
+<!-- MODAL USER -->
+<div class="overlay" id="modal-user">
+  <div class="modal" style="max-width:420px;">
+    <h2>Novo Usuário</h2>
+    <div class="form-group"><label>Nome *</label><input id="u-name" placeholder="Nome completo"></div>
+    <div class="form-group"><label>E-mail *</label><input id="u-email" type="email" placeholder="email@exemplo.com"></div>
+    <div class="form-group"><label>Senha *</label><input id="u-pass" type="password" placeholder="Mínimo 6 caracteres"></div>
+    <div class="form-group"><label>Perfil</label>
+      <select id="u-role">
+        <option value="user">Usuário</option>
+        <option value="admin">Administrador</option>
+      </select>
     </div>
-    <div class="modal-body">
-      <div class="import-steps">
-        <div class="import-step active" id="istep-1"><span class="step-num">1</span> Upload</div>
-        <div class="step-line" id="sline-1"></div>
-        <div class="import-step" id="istep-2"><span class="step-num">2</span> Mapear Colunas</div>
-        <div class="step-line" id="sline-2"></div>
-        <div class="import-step" id="istep-3"><span class="step-num">3</span> Confirmar</div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="document.getElementById('modal-user').classList.remove('open')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveUser()">Criar Usuário</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL IMPORT -->
+<div class="overlay" id="modal-import">
+  <div class="modal" style="max-width:620px;">
+    <h2>Importar Leads (.xls / .xlsx)</h2>
+    <div class="import-step active" id="imp-step1">
+      <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleFileDrop(event)">
+        <div class="drop-zone-icon">📂</div>
+        <div class="drop-zone-text">Clique ou arraste sua planilha aqui</div>
+        <div class="drop-zone-sub">.xls ou .xlsx · máx. 10 MB</div>
       </div>
-      <div id="import-step1">
-        <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()" ondragover="dzOver(event)" ondragleave="dzLeave(event)" ondrop="dzDrop(event)">
-          <div class="dz-icon">📂</div><div class="dz-title">Arraste sua planilha aqui</div>
-          <div class="dz-sub">ou clique para selecionar</div><div class="dz-types">Aceita: .xls · .xlsx · .csv</div>
-        </div>
-        <input type="file" id="fileInput" accept=".xls,.xlsx,.csv" style="display:none" onchange="handleFile(this)">
-        <div class="import-info" style="margin-top:16px;"><span style="font-size:16px;flex-shrink:0;">💡</span><div><strong>Dica:</strong> Na próxima etapa você indica qual coluna corresponde a cada campo (Nome, Telefone, Status, etc.).</div></div>
-      </div>
-      <div id="import-step2" style="display:none;">
-        <div class="import-info" style="margin-bottom:14px;"><span style="font-size:16px;flex-shrink:0;">🗂</span><div id="import-file-info">Arquivo carregado.</div></div>
-        <div style="overflow-x:auto;"><table class="map-table"><thead><tr><th>Campo do CRM</th><th>Coluna da planilha</th><th>Amostra</th></tr></thead><tbody id="mapTableBody"></tbody></table></div>
-      </div>
-      <div id="import-step3" style="display:none;">
-        <div class="import-info" style="margin-bottom:14px;"><span style="font-size:16px;flex-shrink:0;">✅</span><div id="import-preview-info">Prévia dos leads.</div></div>
-        <div class="preview-wrap"><table class="preview-table"><thead id="previewHead"></thead><tbody id="previewBody"></tbody></table></div>
+      <input type="file" id="file-input" accept=".xls,.xlsx" style="display:none" onchange="handleFileSelect(event)">
+    </div>
+    <div class="import-step" id="imp-step2">
+      <p style="font-size:13px;font-weight:600;color:var(--text-2);margin-bottom:14px;">Mapeie as colunas da planilha para os campos do CRM:</p>
+      <div id="mapping-rows"></div>
+    </div>
+    <div class="import-step" id="imp-step3">
+      <div id="preview-info" style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;"></div>
+      <div class="preview-table-wrap"><table><thead id="preview-thead"></thead><tbody id="preview-tbody"></tbody></table></div>
+    </div>
+    <div class="import-step" id="imp-step4">
+      <div class="import-progress">
+        <div id="imp-prog-text" style="font-size:15px;font-weight:800;">Importando…</div>
+        <div class="progress-bar-wrap"><div class="progress-bar" id="imp-prog-bar" style="width:0%"></div></div>
+        <div id="imp-prog-count" style="font-size:12px;color:var(--text-3);">0 / 0</div>
       </div>
     </div>
     <div class="modal-foot">
-      <button class="btn btn-ghost" id="importBtnBack" onclick="importBack()" style="display:none;">← Voltar</button>
-      <button class="btn btn-ghost" onclick="closeImportModal()" style="margin-right:auto;">Cancelar</button>
-      <button class="btn btn-primary" id="importBtnNext" onclick="importNext()" style="background:#16a34a;">Próximo →</button>
+      <button class="btn btn-ghost" onclick="closeImport()">Cancelar</button>
+      <button class="btn btn-ghost btn-sm" id="imp-btn-back" style="display:none" onclick="importBack()">← Voltar</button>
+      <button class="btn btn-primary" id="imp-btn-next" onclick="importNext()">Próximo →</button>
     </div>
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
-
 <script>
-/* ============================================================
-   SUPABASE
-============================================================ */
-const SUPA_URL = 'https://riutcbwillvqjrpaefkb.supabase.co';
-const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJpdXRjYndpbGx2cWpycGFlZmtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3NDk0MzksImV4cCI6MjA5MDMyNTQzOX0.WR69xD-_dvkG7dN2EkwerPw0Su8vcStNgnha8Ky0grA';
-const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
+// ─── SUPABASE ───────────────────────────────────────────────
+const SB_URL  = 'https://riutcbwillvqjrpaefkb.supabase.co';
+const SB_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJpdXRjYndpbGx2cWpycGFlZmtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3NDk0MzksImV4cCI6MjA5MDMyNTQzOX0.WR69xD-_dvkG7dN2EkwerPw0Su8vcStNgnha8Ky0grA';
+const sb = supabase.createClient(SB_URL, SB_KEY);
 
-/* ============================================================
-   CONSTANTS
-============================================================ */
-const STATUSES = [
-  { id:'novo',          label:'Novo Lead',           color:'#8b5cf6' },
-  { id:'contato',       label:'Contato Feito',        color:'#3b82f6' },
-  { id:'proposta',      label:'Proposta Enviada',     color:'#f59e0b' },
-  { id:'negociacao',    label:'Em Negociação',        color:'#f97316' },
-  { id:'aguardando',    label:'Aguardando Retorno',   color:'#06b6d4' },
-  { id:'nao-retornou',  label:'Não Retornou',         color:'#ef4444' },
-  { id:'sem-interesse', label:'Sem Interesse',        color:'#6b7280' },
-  { id:'ganho',         label:'Fechado — Ganho ✓',   color:'#10b981' },
-  { id:'perdido',       label:'Fechado — Perdido ✗', color:'#991b1b' },
-];
+// ─── STATE ──────────────────────────────────────────────────
+let leads = [], equips = [], currentView = 'kanban';
+let filterEquip = 'all';
+let editingLead = null, editingEquip = null;
+let importRows = [], importHeaders = [];
+let currentUser = null, currentProfile = null;
+let importStep = 1;
 
-let equipments = [];
-let leads      = [];
-let filter     = 'all';
-let chartDonut = null;
-let chartBar   = null;
-
-const uid    = () => crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36)+Math.random().toString(36).slice(2);
-const esc    = s => (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-const fmtD   = ts => new Date(ts).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit'});
-const getS   = id => STATUSES.find(s=>s.id===id)||STATUSES[0];
-const getE   = id => equipments.find(e=>e.id===id);
-const initials = n => { const p=(n||'').trim().split(' '); return ((p[0]?.[0]||'')+(p[1]?.[0]||p[0]?.[1]||'')).toUpperCase(); };
-
-function setSyncBadge(state, txt) {
-  const el = document.getElementById('syncBadge');
-  el.className = 'sync-badge ' + state;
-  el.textContent = txt;
-}
-
-/* ============================================================
-   LOADER
-============================================================ */
-function showLoader(txt='Carregando...') {
-  document.getElementById('loaderText').textContent = txt;
-  document.getElementById('loaderOverlay').classList.add('show');
-}
-function hideLoader() { document.getElementById('loaderOverlay').classList.remove('show'); }
-
-/* ============================================================
-   INIT — busca dados do Supabase
-============================================================ */
-async function init() {
-  showLoader('Conectando ao banco de dados...');
-  setSyncBadge('syncing','⏳ Sincronizando');
-  try {
-    const [{ data: eqs, error: e1 }, { data: lds, error: e2 }] = await Promise.all([
-      sb.from('equipamentos').select('*').order('created_at'),
-      sb.from('leads').select('*').order('created_at', { ascending: false }),
-    ]);
-    if (e1) throw e1;
-    if (e2) throw e2;
-    equipments = eqs || [];
-    leads      = lds || [];
-    setSyncBadge('ok','☁ Conectado');
-    renderAll();
-  } catch (err) {
-    setSyncBadge('error','⚠ Erro de conexão');
-    showToast('Erro ao conectar: ' + err.message, 'error');
-  } finally {
-    hideLoader();
-  }
-}
-
-/* ============================================================
-   REALTIME — escuta mudanças em tempo real
-============================================================ */
-function startRealtime() {
-  sb.channel('crm-changes')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'leads' }, async () => {
-      const { data } = await sb.from('leads').select('*').order('created_at', { ascending: false });
-      leads = data || [];
-      renderAll();
-    })
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'equipamentos' }, async () => {
-      const { data } = await sb.from('equipamentos').select('*').order('created_at');
-      equipments = data || [];
-      renderAll();
-    })
-    .subscribe();
-}
-
-/* ============================================================
-   FILTERED
-============================================================ */
-function filtered() {
-  const q = (document.getElementById('searchInput').value||'').toLowerCase();
-  return leads.filter(l => {
-    if (filter !== 'all' && l.equip !== filter) return false;
-    if (q) return (l.name||'').toLowerCase().includes(q) || (l.phone||'').includes(q) || (l.company||'').toLowerCase().includes(q);
-    return true;
-  });
-}
-
-/* ============================================================
-   NAVIGATION
-============================================================ */
-const PAGE_META = {
-  dashboard: { title:'Dashboard',        sub:'Visão geral do funil de vendas'   },
-  funil:     { title:'Funil de Vendas',  sub:'Leads organizados por etapa'      },
-  lista:     { title:'Lista de Leads',   sub:'Todos os contatos cadastrados'    },
+const STATUS_META = {
+  novo:       { label:'Novo',              cls:'s-novo',      color:'#3b82f6' },
+  contato:    { label:'Contato Feito',     cls:'s-contato',   color:'#f59e0b' },
+  nao_ret:    { label:'Não Retornou',      cls:'s-nao_ret',   color:'#fb923c' },
+  proposta:   { label:'Proposta Enviada',  cls:'s-proposta',  color:'#8b5cf6' },
+  negociando: { label:'Negociando',        cls:'s-negociando',color:'#10b981' },
+  fechado:    { label:'Fechado ✅',         cls:'s-fechado',   color:'#22c55e' },
+  perdido:    { label:'Perdido ❌',          cls:'s-perdido',   color:'#ef4444' },
+  sem_int:    { label:'Sem Interesse',     cls:'s-sem_int',   color:'#94a3b8' },
 };
-function goPage(id) {
+const STATUS_ORDER = ['novo','contato','nao_ret','proposta','negociando','fechado','perdido','sem_int'];
+
+const SWATCHES = ['#1b5e20','#0d47a1','#0891b2','#7c3aed','#b45309','#dc2626','#0f766e','#1d4ed8','#be123c','#854d0e','#166534','#1e40af'];
+
+// ─── AUTH ────────────────────────────────────────────────────
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass  = document.getElementById('login-pass').value;
+  const errEl = document.getElementById('login-error');
+  errEl.classList.remove('show');
+  if (!email || !pass) { errEl.textContent='Preencha e-mail e senha.'; errEl.classList.add('show'); return; }
+  const {data, error} = await sb.auth.signInWithPassword({email, password:pass});
+  if (error) { errEl.textContent = error.message; errEl.classList.add('show'); return; }
+  await onLogin(data.user);
+}
+
+async function onLogin(user) {
+  currentUser = user;
+  // load profile
+  const {data:prof} = await sb.from('profiles').select('*').eq('id', user.id).single();
+  currentProfile = prof;
+  // log login
+  try {
+    await sb.from('login_logs').insert({
+      user_id: user.id,
+      user_email: user.email,
+      user_name: prof?.name || user.email
+    });
+  } catch(e) {}
+  // update sidebar
+  const name = prof?.name || user.email;
+  const role = prof?.role || 'user';
+  document.getElementById('sb-name').textContent = name;
+  document.getElementById('sb-role').textContent = role === 'admin' ? 'Administrador' : 'Usuário';
+  document.getElementById('sb-avatar').textContent = name.charAt(0).toUpperCase();
+  // show admin sections
+  if (role === 'admin') {
+    document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
+  }
+  // switch screens
+  document.getElementById('login-screen').classList.remove('active');
+  document.getElementById('app-wrap').classList.remove('hidden');
+  await loadAll();
+}
+
+async function doLogout() {
+  await sb.auth.signOut();
+  currentUser = null; currentProfile = null;
+  document.getElementById('app-wrap').classList.add('hidden');
+  document.getElementById('login-screen').classList.add('active');
+  document.getElementById('login-email').value = '';
+  document.getElementById('login-pass').value = '';
+  document.getElementById('login-error').classList.remove('show');
+  document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
+}
+
+// ─── INIT ────────────────────────────────────────────────────
+(async () => {
+  const {data:{session}} = await sb.auth.getSession();
+  if (session?.user) {
+    await onLogin(session.user);
+  }
+  // realtime
+  sb.channel('realtime-leads').on('postgres_changes',{event:'*',schema:'public',table:'leads'},async()=>{
+    await loadLeads(); renderAll();
+  }).subscribe();
+  sb.channel('realtime-equips').on('postgres_changes',{event:'*',schema:'public',table:'equipamentos'},async()=>{
+    await loadEquips(); renderAll();
+  }).subscribe();
+  // listen enter on login
+  document.getElementById('login-pass').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+  document.getElementById('login-email').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+})();
+
+async function loadAll() {
+  showLoading();
+  await loadEquips();
+  await loadLeads();
+  renderAll();
+  hideLoading();
+}
+
+async function loadLeads() {
+  const {data} = await sb.from('leads').select('*').order('created_at',{ascending:false});
+  leads = data || [];
+}
+
+async function loadEquips() {
+  const {data} = await sb.from('equipamentos').select('*').order('label');
+  equips = data || [];
+  renderEquipChips();
+  renderEquipSelect();
+  renderEquipList();
+}
+
+// ─── ACTIVITY LOG ────────────────────────────────────────────
+async function logActivity(action, entity, entityId, entityName, details) {
+  if (!currentUser) return;
+  try {
+    await sb.from('activity_logs').insert({
+      user_id: currentUser.id,
+      user_email: currentUser.email,
+      user_name: currentProfile?.name || currentUser.email,
+      action, entity,
+      entity_id: entityId || null,
+      entity_name: entityName || null,
+      details: details || null
+    });
+  } catch(e) {}
+}
+
+// ─── NAVIGATE ────────────────────────────────────────────────
+const PAGE_META = {
+  dashboard:     { title:'Dashboard',       sub:'Visão geral' },
+  funnel:        { title:'Funil de Vendas', sub:'Pipeline de leads' },
+  list:          { title:'Leads',           sub:'Gerencie seus contatos' },
+  equipamentos:  { title:'Equipamentos',    sub:'Cadastros de equipamentos' },
+  usuarios:      { title:'Usuários',        sub:'Gerenciamento de acesso' },
+  'rel-atividade':{ title:'Atividade',      sub:'Log de ações no sistema' },
+  'rel-logins':  { title:'Logins',          sub:'Histórico de acessos' },
+};
+const TOPBAR_PAGES = new Set(['list']);
+
+function navTo(page, el) {
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  document.getElementById('page-'+id).classList.add('active');
-  document.querySelector(`.nav-item[onclick*="${id}"]`).classList.add('active');
-  document.getElementById('topTitle').textContent = PAGE_META[id].title;
-  document.getElementById('topSub').textContent   = PAGE_META[id].sub;
-  renderAll();
+  document.getElementById('page-'+page).classList.add('active');
+  if (el) el.classList.add('active');
+  const meta = PAGE_META[page] || {};
+  document.getElementById('topbar-title').textContent = meta.title || page;
+  document.getElementById('topbar-sub').textContent   = meta.sub   || '';
+  // show/hide topbar controls
+  const showLeadControls = TOPBAR_PAGES.has(page) || page==='funnel';
+  document.getElementById('btn-add-lead').style.display  = (page==='list'||page==='funnel') ? '' : 'none';
+  document.getElementById('btn-import').style.display    = (page==='list') ? '' : 'none';
+  document.getElementById('view-toggle').style.display   = (page==='list') ? '' : 'none';
+  document.getElementById('search-wrap').style.display   = (page==='list'||page==='funnel') ? '' : 'none';
+  document.getElementById('equip-filter-chips').style.display = (page==='list'||page==='funnel') ? '' : 'none';
+  // page-specific
+  if (page==='dashboard') renderDashboard();
+  if (page==='funnel') renderFunnel();
+  if (page==='list') { renderKanban(); renderList(); }
+  if (page==='equipamentos') renderEquipList();
+  if (page==='usuarios') loadUsersPage();
+  if (page==='rel-atividade') loadActivityReport();
+  if (page==='rel-logins') loadLoginsReport();
 }
 
-/* ============================================================
-   RENDER ALL
-============================================================ */
-function renderAll() {
-  renderChips();
-  renderNavBadges();
-  renderDashboard();
-  renderKanban();
-  renderList();
-}
-
-function renderChips() {
-  const wrap = document.getElementById('equipChips');
-  wrap.innerHTML = `<div class="chip ${filter==='all'?'active':''}" onclick="setFilter('all')">Todos</div>`;
-  equipments.forEach(eq => {
-    wrap.innerHTML += `<div class="chip ${filter===eq.id?'active':''}"
-      style="${filter===eq.id?`background:${eq.color};border-color:${eq.color};`:`border-color:${eq.color}40;color:${eq.color};`}"
-      onclick="setFilter('${eq.id}')">${eq.label}</div>`;
+// ─── RENDER CHIPS ────────────────────────────────────────────
+function renderEquipChips() {
+  const containers = ['equip-filter-chips','funnel-equip-chips'];
+  containers.forEach(cid => {
+    const c = document.getElementById(cid);
+    if (!c) return;
+    c.innerHTML = `<div class="chip${filterEquip==='all'?' active':''}" onclick="setEquipFilter('all','${cid}')">Todos</div>` +
+      equips.map(e=>`<div class="chip${filterEquip===e.id?' active':''}" onclick="setEquipFilter('${e.id}','${cid}')" style="${filterEquip===e.id?'background:'+e.color+';border-color:'+e.color+';color:#fff':''}">`+
+        `<span style="width:8px;height:8px;border-radius:50%;background:${e.color};display:inline-block;"></span>${e.label}</div>`).join('');
   });
 }
-function renderNavBadges() {
-  const n = filtered().length;
-  document.getElementById('nb-funil').textContent = n;
-  document.getElementById('nb-lista').textContent = n;
-}
-function setFilter(id) { filter = id; renderAll(); }
 
-/* ============================================================
-   DASHBOARD
-============================================================ */
+function setEquipFilter(id, fromCid) {
+  filterEquip = id;
+  renderEquipChips();
+  const active = document.querySelector('.page.active');
+  if (active?.id==='page-funnel') renderFunnel();
+  else { renderKanban(); renderList(); }
+}
+
+function renderEquipSelect() {
+  const sel = document.getElementById('f-equip');
+  sel.innerHTML = equips.map(e=>`<option value="${e.id}">${e.label}</option>`).join('');
+}
+
+// ─── DASHBOARD ───────────────────────────────────────────────
+let chartStatus=null, chartEquip=null, chartBar=null;
+
 function renderDashboard() {
-  const fl = filtered();
-  const total   = fl.length;
-  const ganho   = fl.filter(l=>l.status==='ganho').length;
-  const negoc   = fl.filter(l=>l.status==='negociacao').length;
-  const ativos  = fl.filter(l=>!['ganho','perdido','sem-interesse'].includes(l.status)).length;
-  const taxa    = total>0 ? Math.round((ganho/total)*100) : 0;
+  const total = leads.length;
+  const fechados = leads.filter(l=>l.status==='fechado').length;
+  const novos    = leads.filter(l=>l.status==='novo').length;
+  const negoc    = leads.filter(l=>l.status==='negociando').length;
+  const taxa = total>0 ? ((fechados/total)*100).toFixed(1) : 0;
 
-  document.getElementById('kpiRow').innerHTML = [
-    { label:'Total de Leads',    value:total,     color:'#6366f1', icon:'👥' },
-    { label:'Leads Ativos',      value:ativos,    color:'#3b82f6', icon:'🎯' },
-    { label:'Em Negociação',     value:negoc,     color:'#f97316', icon:'🤝' },
-    { label:'Fechados — Ganho',  value:ganho,     color:'#10b981', icon:'✅' },
-    { label:'Taxa de Conversão', value:taxa+'%',  color:'#8b5cf6', icon:'📈' },
-  ].map(k=>`<div class="kpi-card" style="border-left-color:${k.color}">
-    <div class="kpi-icon" style="color:${k.color}">${k.icon}</div>
-    <div class="kpi-label">${k.label}</div>
-    <div class="kpi-value" style="color:${k.color}">${k.value}</div>
-  </div>`).join('');
-
-  renderDonut(fl); renderBar(fl); renderFunnel(fl); renderRecent(fl);
-}
-
-function renderDonut(fl) {
-  const ctx = document.getElementById('chartDonut').getContext('2d');
-  if (chartDonut) chartDonut.destroy();
-  chartDonut = new Chart(ctx, {
-    type:'doughnut',
-    data:{ labels:STATUSES.map(s=>s.label.replace(' ✓','').replace(' ✗','')),
-           datasets:[{ data:STATUSES.map(s=>fl.filter(l=>l.status===s.id).length), backgroundColor:STATUSES.map(s=>s.color), borderWidth:2, borderColor:'#fff', hoverOffset:6 }] },
-    options:{ responsive:true, maintainAspectRatio:true, cutout:'62%',
-      plugins:{ legend:{ position:'right', labels:{ font:{size:11,weight:'600'}, padding:10, boxWidth:12, boxHeight:12 } },
-        tooltip:{ callbacks:{ label:ctx=>{ const t=ctx.dataset.data.reduce((a,b)=>a+b,0); const p=t>0?Math.round((ctx.raw/t)*100):0; return ` ${ctx.raw} lead${ctx.raw!==1?'s':''} (${p}%)`; } } } } }
-  });
-}
-
-function renderBar(fl) {
-  const ctx = document.getElementById('chartBar').getContext('2d');
-  if (chartBar) chartBar.destroy();
-  chartBar = new Chart(ctx, {
-    type:'bar',
-    data:{ labels:equipments.map(e=>e.label),
-           datasets:STATUSES.map(s=>({ label:s.label.replace(' ✓','').replace(' ✗',''), data:equipments.map(eq=>fl.filter(l=>l.equip===eq.id&&l.status===s.id).length), backgroundColor:s.color, borderRadius:4, borderSkipped:false })) },
-    options:{ responsive:true, maintainAspectRatio:false,
-      scales:{ x:{stacked:true,grid:{display:false},ticks:{font:{size:12,weight:'700'}}}, y:{stacked:true,beginAtZero:true,ticks:{stepSize:1,font:{size:11}},grid:{color:'#f1f5f9'}} },
-      plugins:{ legend:{display:false}, tooltip:{mode:'index',intersect:false} } }
-  });
-}
-
-function renderFunnel(fl) {
-  const total = fl.length||1;
-  document.getElementById('funnelViz').innerHTML = STATUSES.map(s=>{
-    const cnt = fl.filter(l=>l.status===s.id).length;
-    const pct = Math.round((cnt/total)*100);
-    return `<div class="funnel-row" onclick="goPage('funil')">
-      <span class="funnel-label">${s.label.replace(' ✓','').replace(' ✗','')}</span>
-      <div class="funnel-bar-wrap"><div class="funnel-bar" style="width:${Math.max(pct,cnt>0?4:0)}%;background:${s.color};">${cnt>0&&pct>8?pct+'%':''}</div></div>
-      <span class="funnel-count">${cnt}</span>
-    </div>`;
-  }).join('');
-}
-
-function renderRecent(fl) {
-  const recent = [...fl].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,7);
-  const el = document.getElementById('recentList');
-  if (!recent.length) { el.innerHTML=`<div style="padding:30px;text-align:center;color:var(--text-3);font-size:13px;">Nenhum lead cadastrado</div>`; return; }
-  el.innerHTML = recent.map(l=>{
-    const eq=getE(l.equip); const st=getS(l.status); const color=eq?.color||'#888';
+  document.getElementById('kpi-row').innerHTML = `
+    <div class="kpi-card" style="border-left-color:#3b82f6"><span class="kpi-icon">👥</span><div class="kpi-label">Total Leads</div><div class="kpi-value" style="color:#3b82f6">${total}</div></div>
+    <div class="kpi-card" style="border-left-color:#22c55e"><span class="kpi-icon">✅</span><div class="kpi-label">Fechados</div><div class="kpi-value" style="color:#22c55e">${fechados}</div></div>
+    <div class="kpi-card" style="border-left-color:#f59e0b"><span class="kpi-icon">🔥</span><div class="kpi-label">Novos</div><div class="kpi-value" style="color:#f59e0b">${novos}</div></div>
+    <div class="kpi-card" style="border-left-color:#8b5cf6"><span class="kpi-icon">💬</span><div class="kpi-label">Negociando</div><div class="kpi-value" style="color:#8b5cf6">${negoc}</div></div>
+    <div class="kpi-card" style="border-left-color:#0891b2"><span class="kpi-icon">📈</span><div class="kpi-label">Taxa Fechamento</div><div class="kpi-value" style="color:#0891b2">${taxa}%</div></div>
+  `;
+  // recent
+  document.getElementById('recent-list').innerHTML = leads.slice(0,5).map(l=>{
+    const eq = equips.find(e=>e.id===l.equip)||{color:'#94a3b8',label:'—'};
+    const sm = STATUS_META[l.status]||{label:l.status,cls:'s-novo'};
     return `<div class="recent-item" onclick="editLead('${l.id}')">
-      <div class="avatar" style="background:${color}">${esc(initials(l.name))}</div>
-      <div class="recent-info">
-        <div class="recent-name">${esc(l.name)}${l.company?`<span style="font-weight:500;color:var(--text-3);font-size:11px;"> · ${esc(l.company)}</span>`:''}</div>
-        <div class="recent-phone">${l.phone||'—'}</div>
-      </div>
-      <span class="status-pill" style="background:${st.color}18;color:${st.color}"><span class="status-dot" style="background:${st.color}"></span>${st.label.replace(' ✓','').replace(' ✗','')}</span>
+      <div class="avatar" style="background:${eq.color}">${(l.name||'?').charAt(0).toUpperCase()}</div>
+      <div class="recent-info"><div class="recent-name">${l.name}</div><div class="recent-phone">${l.phone||'—'}</div></div>
+      <span class="recent-tag badge ${sm.cls}">${sm.label}</span>
     </div>`;
-  }).join('');
+  }).join('') || '<div style="padding:20px;text-align:center;color:var(--text-3);font-size:13px;">Nenhum lead ainda.</div>';
+
+  // Chart status
+  const statusCounts = STATUS_ORDER.map(s=>leads.filter(l=>l.status===s).length);
+  const statusColors = STATUS_ORDER.map(s=>STATUS_META[s].color);
+  const statusLabels = STATUS_ORDER.map(s=>STATUS_META[s].label);
+  if (chartStatus) chartStatus.destroy();
+  chartStatus = new Chart(document.getElementById('chartStatus'),{type:'doughnut',data:{labels:statusLabels,datasets:[{data:statusCounts,backgroundColor:statusColors,borderWidth:2,borderColor:'#fff'}]},options:{plugins:{legend:{position:'right',labels:{font:{size:11},padding:10}}},cutout:'65%'}});
+
+  // Chart equip
+  const equipCounts = equips.map(e=>leads.filter(l=>l.equip===e.id).length);
+  const equipColors = equips.map(e=>e.color);
+  if (chartEquip) chartEquip.destroy();
+  chartEquip = new Chart(document.getElementById('chartEquip'),{type:'doughnut',data:{labels:equips.map(e=>e.label),datasets:[{data:equipCounts,backgroundColor:equipColors,borderWidth:2,borderColor:'#fff'}]},options:{plugins:{legend:{position:'right',labels:{font:{size:11},padding:10}}},cutout:'65%'}});
+
+  // Chart bar
+  const datasets = equips.map(e=>({label:e.label,data:STATUS_ORDER.map(s=>leads.filter(l=>l.equip===e.id&&l.status===s).length),backgroundColor:e.color+'cc',borderRadius:4}));
+  if (chartBar) chartBar.destroy();
+  chartBar = new Chart(document.getElementById('chartBar'),{type:'bar',data:{labels:statusLabels,datasets},options:{plugins:{legend:{position:'top',labels:{font:{size:11}}}},responsive:true,scales:{x:{stacked:true,ticks:{font:{size:10}}},y:{stacked:true,ticks:{stepSize:1}}}}});
 }
 
-/* ============================================================
-   KANBAN
-============================================================ */
+// ─── FUNNEL ──────────────────────────────────────────────────
+let funnelFilter = null;
+
+function renderFunnel() {
+  const filtered = leads.filter(l=>filterEquip==='all'||l.equip===filterEquip);
+  const max = Math.max(...STATUS_ORDER.map(s=>filtered.filter(l=>l.status===s).length),1);
+  document.getElementById('funnel-visual').innerHTML = STATUS_ORDER.map(s=>{
+    const meta = STATUS_META[s];
+    const cnt = filtered.filter(l=>l.status===s).length;
+    const pct = Math.max((cnt/max)*100,2);
+    return `<div class="funnel-row" onclick="setFunnelFilter('${s}')">
+      <div class="funnel-label">${meta.label}</div>
+      <div class="funnel-bar-wrap"><div class="funnel-bar" style="width:${pct}%;background:${meta.color}">${cnt>0?cnt:''}</div></div>
+      <div class="funnel-count">${cnt}</div>
+    </div>`;
+  }).join('');
+  renderFunnelTable(filtered);
+}
+
+function setFunnelFilter(s) {
+  funnelFilter = funnelFilter===s ? null : s;
+  const meta = funnelFilter ? STATUS_META[funnelFilter] : null;
+  document.getElementById('funnel-detail-title').textContent = meta ? meta.label : 'Todos os Leads';
+  const filtered = leads.filter(l=>filterEquip==='all'||l.equip===filterEquip);
+  renderFunnelTable(filtered);
+}
+
+function renderFunnelTable(filtered) {
+  const rows = funnelFilter ? filtered.filter(l=>l.status===funnelFilter) : filtered;
+  const search = document.getElementById('search-input').value.toLowerCase();
+  const final = rows.filter(l=>(l.name||'').toLowerCase().includes(search)||(l.phone||'').includes(search));
+  document.getElementById('funnel-tbody').innerHTML = final.length ? final.map(l=>rowHTML(l)).join('') :
+    '<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text-3);">Nenhum lead encontrado.</td></tr>';
+}
+
+function rowHTML(l) {
+  const eq = equips.find(e=>e.id===l.equip)||{color:'#94a3b8',label:'—'};
+  const sm = STATUS_META[l.status]||{label:l.status,cls:'s-novo'};
+  return `<tr>
+    <td><b>${l.name}</b></td>
+    <td>${l.phone||'—'}</td>
+    <td><span style="display:inline-flex;align-items:center;gap:5px;"><span style="width:8px;height:8px;border-radius:50%;background:${eq.color};display:inline-block;"></span>${eq.label}</span></td>
+    <td><span class="badge ${sm.cls}">${sm.label}</span></td>
+    <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${l.note||'—'}</td>
+    <td style="white-space:nowrap;">
+      <button class="btn btn-ghost btn-sm" onclick="editLead('${l.id}')">✏️</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteLead('${l.id}')">🗑</button>
+    </td>
+  </tr>`;
+}
+
+// ─── KANBAN ──────────────────────────────────────────────────
 function renderKanban() {
-  document.getElementById('kanbanBoard').innerHTML = STATUSES.map(st=>{
-    const cards = filtered().filter(l=>l.status===st.id);
-    return `<div class="k-col">
-      <div class="k-col-head"><span class="k-col-dot" style="background:${st.color}"></span><span class="k-col-name">${st.label.replace(' ✓','').replace(' ✗','')}</span><span class="k-col-cnt">${cards.length}</span></div>
-      <div class="k-cards">${cards.length ? cards.map(kCard).join('') : '<div class="k-empty">Nenhum lead</div>'}</div>
+  const search = document.getElementById('search-input').value.toLowerCase();
+  const filtered = leads.filter(l=>(filterEquip==='all'||l.equip===filterEquip)&&
+    ((l.name||'').toLowerCase().includes(search)||(l.phone||'').includes(search)));
+  const wrap = document.getElementById('kanban-wrap');
+  wrap.innerHTML = STATUS_ORDER.map(s=>{
+    const meta = STATUS_META[s];
+    const cards = filtered.filter(l=>l.status===s);
+    return `<div class="kanban-col">
+      <div class="kanban-col-hd" style="border-bottom-color:${meta.color}">
+        <div class="kanban-col-title">${meta.label}</div>
+        <span class="kanban-col-count">${cards.length}</span>
+      </div>
+      <div class="kanban-cards">
+        ${cards.length ? cards.map(l=>{
+          const eq=equips.find(e=>e.id===l.equip)||{color:'#94a3b8',label:'—'};
+          return `<div class="k-card" style="border-left-color:${eq.color}" onclick="editLead('${l.id}')">
+            <div class="k-card-name">${l.name}</div>
+            <div class="k-card-phone">${l.phone||'—'}</div>
+            <div class="k-card-foot">
+              <span><span class="k-equip-dot" style="background:${eq.color}"></span><span class="k-equip-label"> ${eq.label}</span></span>
+              <button class="btn btn-danger btn-sm" onclick="event.stopPropagation();deleteLead('${l.id}')">🗑</button>
+            </div>
+          </div>`;
+        }).join('') : `<div style="font-size:12px;color:var(--text-3);text-align:center;padding:10px;">Vazio</div>`}
+      </div>
     </div>`;
   }).join('');
 }
 
-function kCard(l) {
-  const eq=getE(l.equip); const color=eq?.color||'#888';
-  return `<div class="k-card" onclick="editLead('${l.id}')">
-    <span class="k-card-equip" style="background:${color}18;color:${color}">${esc(eq?.label||l.equip)}</span>
-    <div class="k-card-name">${esc(l.name)}</div>
-    <div class="k-card-phone">📞 ${l.phone||'—'}</div>
-    ${l.note?`<div class="k-card-note">${esc(l.note)}</div>`:''}
-    <div class="k-card-foot"><span class="k-card-date">${fmtD(l.created_at)}</span></div>
-  </div>`;
-}
-
-/* ============================================================
-   LIST
-============================================================ */
+// ─── LIST ────────────────────────────────────────────────────
 function renderList() {
-  const fl = filtered();
-  const tbody = document.getElementById('listBody');
-  if (!fl.length) { tbody.innerHTML=`<tr><td colspan="7" class="no-data">Nenhum lead encontrado</td></tr>`; return; }
-  tbody.innerHTML = fl.map(l=>{
-    const eq=getE(l.equip); const st=getS(l.status); const color=eq?.color||'#888';
+  const search = document.getElementById('search-input').value.toLowerCase();
+  const filtered = leads.filter(l=>(filterEquip==='all'||l.equip===filterEquip)&&
+    ((l.name||'').toLowerCase().includes(search)||(l.phone||'').includes(search)));
+  const tbody = document.getElementById('list-tbody');
+  tbody.innerHTML = filtered.length ? filtered.map(l=>{
+    const eq=equips.find(e=>e.id===l.equip)||{color:'#94a3b8',label:'—'};
+    const sm=STATUS_META[l.status]||{label:l.status,cls:'s-novo'};
     return `<tr>
-      <td><div class="td-name">${esc(l.name)}</div>${l.company?`<div class="td-email">${esc(l.company)}</div>`:''}${l.email?`<div class="td-email">${esc(l.email)}</div>`:''}</td>
-      <td class="td-phone">${l.phone||'—'}</td>
-      <td><span class="status-pill" style="background:${color}18;color:${color}">${esc(eq?.label||l.equip)}</span></td>
-      <td><span class="status-pill" style="background:${st.color}18;color:${st.color}"><span class="status-dot" style="background:${st.color}"></span>${st.label.replace(' ✓','').replace(' ✗','')}</span></td>
-      <td class="td-note" title="${esc(l.note)}">${esc(l.note)||'—'}</td>
-      <td class="td-date">${fmtD(l.created_at)}</td>
-      <td>
-        <button class="btn btn-ghost btn-sm" onclick="editLead('${l.id}');event.stopPropagation()" style="margin-right:4px;">✏️</button>
-        <button class="btn btn-danger btn-sm" onclick="deleteLead('${l.id}');event.stopPropagation()">🗑</button>
+      <td><b>${l.name}</b></td>
+      <td>${l.phone||'—'}</td>
+      <td>${l.email||'—'}</td>
+      <td>${l.company||'—'}</td>
+      <td><span style="display:inline-flex;align-items:center;gap:5px;"><span style="width:8px;height:8px;border-radius:50%;background:${eq.color};display:inline-block;"></span>${eq.label}</span></td>
+      <td><span class="badge ${sm.cls}">${sm.label}</span></td>
+      <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${l.note||'—'}</td>
+      <td style="white-space:nowrap;">
+        <button class="btn btn-ghost btn-sm" onclick="editLead('${l.id}')">✏️</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteLead('${l.id}')">🗑</button>
       </td>
     </tr>`;
-  }).join('');
+  }).join('') : '<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--text-3);">Nenhum lead encontrado.</td></tr>';
 }
 
-/* ============================================================
-   LEAD CRUD
-============================================================ */
-function openLeadModal(prefill) {
-  const eqDef = prefill || (filter!=='all'?filter:equipments[0]?.id);
-  ['leadId','leadName','leadPhone','leadEmail','leadCompany','leadNote'].forEach(id=>document.getElementById(id).value='');
-  fillEquipSel(eqDef); fillStatusSel('novo');
-  document.getElementById('leadModalTitle').textContent = 'Novo Lead';
-  document.getElementById('leadModal').classList.add('open');
-  setTimeout(()=>document.getElementById('leadName').focus(),200);
-}
-function closeLeadModal() { document.getElementById('leadModal').classList.remove('open'); }
-
-function editLead(id) {
-  const l = leads.find(x=>x.id===id); if (!l) return;
-  document.getElementById('leadId').value      = l.id;
-  document.getElementById('leadName').value    = l.name;
-  document.getElementById('leadPhone').value   = l.phone||'';
-  document.getElementById('leadEmail').value   = l.email||'';
-  document.getElementById('leadCompany').value = l.company||'';
-  document.getElementById('leadNote').value    = l.note||'';
-  fillEquipSel(l.equip); fillStatusSel(l.status);
-  document.getElementById('leadModalTitle').textContent = 'Editar Lead';
-  document.getElementById('leadModal').classList.add('open');
+function setView(v) {
+  currentView = v;
+  document.getElementById('kanban-view').style.display = v==='kanban' ? '' : 'none';
+  document.getElementById('list-view').style.display   = v==='list'   ? '' : 'none';
+  document.getElementById('btn-kanban').className = 'btn btn-sm ' + (v==='kanban'?'btn-primary':'btn-ghost');
+  document.getElementById('btn-listv').className  = 'btn btn-sm ' + (v==='list' ?'btn-primary':'btn-ghost');
+  if (v==='kanban') renderKanban(); else renderList();
 }
 
-function fillEquipSel(sel) {
-  document.getElementById('leadEquip').innerHTML = equipments.map(e=>`<option value="${e.id}" ${e.id===sel?'selected':''}>${e.label}</option>`).join('');
+function renderAll() {
+  const active = document.querySelector('.page.active');
+  if (!active) return;
+  const pg = active.id.replace('page-','');
+  if (pg==='dashboard')    renderDashboard();
+  if (pg==='funnel')       renderFunnel();
+  if (pg==='list')         { renderKanban(); renderList(); }
+  if (pg==='equipamentos') renderEquipList();
 }
-function fillStatusSel(sel) {
-  document.getElementById('leadStatus').innerHTML = STATUSES.map(s=>`<option value="${s.id}" ${s.id===sel?'selected':''}>${s.label}</option>`).join('');
+
+// ─── LEAD MODAL ──────────────────────────────────────────────
+function openLeadModal(lead=null) {
+  editingLead = lead;
+  document.getElementById('modal-lead-title').textContent = lead ? 'Editar Lead' : 'Novo Lead';
+  document.getElementById('f-name').value    = lead?.name||'';
+  document.getElementById('f-phone').value   = lead?.phone||'';
+  document.getElementById('f-email').value   = lead?.email||'';
+  document.getElementById('f-company').value = lead?.company||'';
+  document.getElementById('f-equip').value   = lead?.equip || equips[0]?.id || '';
+  document.getElementById('f-status').value  = lead?.status||'novo';
+  document.getElementById('f-note').value    = lead?.note||'';
+  document.getElementById('modal-lead').classList.add('open');
+  setTimeout(()=>document.getElementById('f-name').focus(),100);
+}
+
+function closeLeadModal() {
+  document.getElementById('modal-lead').classList.remove('open');
+  editingLead = null;
 }
 
 async function saveLead() {
-  const name    = document.getElementById('leadName').value.trim();
-  const phone   = document.getElementById('leadPhone').value.trim();
-  const equip   = document.getElementById('leadEquip').value;
-  const status  = document.getElementById('leadStatus').value;
-  const email   = document.getElementById('leadEmail').value.trim();
-  const company = document.getElementById('leadCompany').value.trim();
-  const note    = document.getElementById('leadNote').value.trim();
-  const id      = document.getElementById('leadId').value;
-
-  if (!name)  { showToast('Informe o nome do lead','error'); return; }
-  if (!phone) { showToast('Informe o telefone','error'); return; }
-
-  setSyncBadge('syncing','⏳ Salvando');
+  const name   = document.getElementById('f-name').value.trim();
+  const phone  = document.getElementById('f-phone').value.trim();
+  const email  = document.getElementById('f-email').value.trim();
+  const company= document.getElementById('f-company').value.trim();
+  const equip  = document.getElementById('f-equip').value;
+  const status = document.getElementById('f-status').value;
+  const note   = document.getElementById('f-note').value.trim();
+  if (!name) { toast('Nome obrigatório.'); return; }
   closeLeadModal();
-
-  const payload = { name, phone, equip, status, email, company, note };
-
-  if (id) {
-    const { error } = await sb.from('leads').update({ ...payload, updated_at: new Date().toISOString() }).eq('id', id);
-    if (error) { showToast('Erro ao atualizar: '+error.message,'error'); setSyncBadge('error','⚠ Erro'); return; }
-    leads = leads.map(l => l.id===id ? {...l,...payload} : l);
-    showToast('Lead atualizado ✓','success');
+  const isNew = !editingLead;
+  if (editingLead) {
+    const {error} = await sb.from('leads').update({name,phone,email,company,equip,status,note,updated_at:new Date().toISOString()}).eq('id',editingLead.id);
+    if (error) { toast('Erro ao salvar.'); return; }
+    await logActivity('Editou Lead','Lead',editingLead.id,name,`status: ${status}`);
   } else {
-    const newLead = { id: uid(), ...payload, created_at: new Date().toISOString() };
-    const { error } = await sb.from('leads').insert(newLead);
-    if (error) { showToast('Erro ao salvar: '+error.message,'error'); setSyncBadge('error','⚠ Erro'); return; }
-    leads.unshift(newLead);
-    showToast('Lead cadastrado ✓','success');
+    const id = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36);
+    const {error} = await sb.from('leads').insert({id,name,phone,email,company,equip,status,note,created_at:new Date().toISOString(),updated_at:new Date().toISOString()});
+    if (error) { toast('Erro ao criar lead.'); return; }
+    await logActivity('Criou Lead','Lead',id,name,`equip: ${equip}, status: ${status}`);
   }
+  toast(isNew ? 'Lead criado!' : 'Lead atualizado!');
+  await loadLeads(); renderAll();
+}
 
-  setSyncBadge('ok','☁ Conectado');
-  renderAll();
+function editLead(id) {
+  const l = leads.find(x=>x.id===id);
+  if (l) openLeadModal(l);
 }
 
 async function deleteLead(id) {
-  if (!confirm('Remover este lead permanentemente?')) return;
-  setSyncBadge('syncing','⏳ Removendo');
-  const { error } = await sb.from('leads').delete().eq('id', id);
-  if (error) { showToast('Erro ao remover: '+error.message,'error'); setSyncBadge('error','⚠ Erro'); return; }
-  leads = leads.filter(l=>l.id!==id);
-  setSyncBadge('ok','☁ Conectado');
-  renderAll();
-  showToast('Lead removido','success');
+  if (!confirm('Excluir este lead?')) return;
+  const l = leads.find(x=>x.id===id);
+  const {error} = await sb.from('leads').delete().eq('id',id);
+  if (error) { toast('Erro ao excluir.'); return; }
+  await logActivity('Removeu Lead','Lead',id,l?.name||id,null);
+  toast('Lead removido.');
+  await loadLeads(); renderAll();
 }
 
-/* ============================================================
-   EQUIPAMENTOS CRUD
-============================================================ */
-function openEquipModal() { renderEquipList(); document.getElementById('equipModal').classList.add('open'); }
-function closeEquipModal() { document.getElementById('equipModal').classList.remove('open'); renderAll(); }
+// ─── EQUIP MODAL ─────────────────────────────────────────────
+function openEquipModal(eq=null) {
+  editingEquip = eq;
+  document.getElementById('modal-equip-title').textContent = eq ? 'Editar Equipamento' : 'Novo Equipamento';
+  document.getElementById('eq-label').value = eq?.label||'';
+  document.getElementById('eq-color').value = eq?.color||'#1b5e20';
+  renderSwatches(eq?.color||'#1b5e20');
+  document.getElementById('modal-equip').classList.add('open');
+}
+
+function closeEquipModal() {
+  document.getElementById('modal-equip').classList.remove('open');
+  editingEquip = null;
+}
+
+function renderSwatches(selected) {
+  document.getElementById('color-swatch').innerHTML = SWATCHES.map(c=>
+    `<div class="swatch${c===selected?' selected':''}" style="background:${c}" onclick="selectSwatch('${c}')"></div>`
+  ).join('');
+}
+
+function selectSwatch(c) {
+  document.getElementById('eq-color').value = c;
+  renderSwatches(c);
+}
+
+async function saveEquip() {
+  const label = document.getElementById('eq-label').value.trim();
+  const color = document.getElementById('eq-color').value;
+  if (!label) { toast('Nome obrigatório.'); return; }
+  closeEquipModal();
+  const isNew = !editingEquip;
+  if (editingEquip) {
+    const {error} = await sb.from('equipamentos').update({label,color}).eq('id',editingEquip.id);
+    if (error) { toast('Erro ao salvar.'); return; }
+    await logActivity('Editou Equipamento','Equipamento',editingEquip.id,label,`cor: ${color}`);
+  } else {
+    const id = label.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]/g,'_').slice(0,30)+'_'+Date.now().toString(36).slice(-4);
+    const {error} = await sb.from('equipamentos').insert({id,label,color,created_at:new Date().toISOString()});
+    if (error) { toast('Erro ao criar.'); return; }
+    await logActivity('Criou Equipamento','Equipamento',id,label,`cor: ${color}`);
+  }
+  toast(isNew ? 'Equipamento criado!' : 'Equipamento atualizado!');
+  await loadEquips(); renderAll();
+}
 
 function renderEquipList() {
-  document.getElementById('equipList').innerHTML = equipments.map(e=>{
-    const cnt = leads.filter(l=>l.equip===e.id).length;
-    return `<div class="equip-item">
-      <span class="equip-color-dot" style="background:${e.color}"></span>
-      <span class="equip-name-text">${esc(e.label)}</span>
-      <span class="equip-leads-cnt">${cnt} lead${cnt!==1?'s':''}</span>
-      ${equipments.length>1?`<button class="btn btn-danger btn-sm" onclick="removeEquip('${e.id}')">✕</button>`:''}
-    </div>`;
-  }).join('');
+  const list = document.getElementById('equip-list');
+  if (!list) return;
+  list.innerHTML = equips.length ? equips.map(e=>`
+    <div class="equip-item">
+      <div class="equip-color-dot" style="background:${e.color}"></div>
+      <div class="equip-label-text">${e.label}</div>
+      <div class="equip-actions">
+        <button class="btn btn-ghost btn-sm" onclick="openEquipModal(${JSON.stringify(e).replace(/"/g,'&quot;')})">✏️</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteEquip('${e.id}')">🗑</button>
+      </div>
+    </div>`).join('') : '<div style="padding:20px;text-align:center;color:var(--text-3);">Nenhum equipamento cadastrado.</div>';
 }
 
-async function addEquip() {
-  const name  = document.getElementById('newEquipName').value.trim();
-  const color = document.getElementById('newEquipColor').value;
-  if (!name) { showToast('Informe o nome do equipamento','error'); return; }
-  const id = name.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'')+'-'+Date.now().toString(36);
-  const { error } = await sb.from('equipamentos').insert({ id, label:name, color });
-  if (error) { showToast('Erro: '+error.message,'error'); return; }
-  equipments.push({ id, label:name, color });
-  document.getElementById('newEquipName').value='';
-  renderEquipList(); renderAll();
-  showToast('Equipamento adicionado ✓','success');
+async function deleteEquip(id) {
+  if (!confirm('Excluir este equipamento?')) return;
+  const eq = equips.find(x=>x.id===id);
+  const {error} = await sb.from('equipamentos').delete().eq('id',id);
+  if (error) { toast('Erro ao excluir.'); return; }
+  await logActivity('Removeu Equipamento','Equipamento',id,eq?.label||id,null);
+  toast('Equipamento removido.');
+  await loadEquips(); renderAll();
 }
 
-async function removeEquip(id) {
-  const cnt = leads.filter(l=>l.equip===id).length;
-  if (cnt>0 && !confirm(`Este equipamento tem ${cnt} lead(s). Remover mesmo assim?`)) return;
-  const { error } = await sb.from('equipamentos').delete().eq('id',id);
-  if (error) { showToast('Erro: '+error.message,'error'); return; }
-  equipments = equipments.filter(e=>e.id!==id);
-  if (filter===id) filter='all';
-  renderEquipList(); renderAll();
-  showToast('Equipamento removido','success');
+// ─── USERS ───────────────────────────────────────────────────
+async function loadUsersPage() {
+  const list = document.getElementById('users-list');
+  list.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text-3);">Carregando…</div>';
+  const {data, error} = await sb.from('profiles').select('*').order('created_at');
+  if (error || !data) { list.innerHTML = '<div style="padding:20px;color:var(--danger);">Erro ao carregar usuários.</div>'; return; }
+  list.innerHTML = data.length ? data.map(u=>`
+    <div class="user-item">
+      <div class="user-avatar-sm">${(u.name||'?').charAt(0).toUpperCase()}</div>
+      <div class="user-info">
+        <div class="user-name">${u.name}</div>
+        <div class="user-email">${u.email||'—'}</div>
+      </div>
+      <span class="user-badge ${u.role==='admin'?'badge-admin':'badge-user'}">${u.role==='admin'?'Admin':'Usuário'}</span>
+      ${!u.active ? '<span class="user-badge badge-inactive">Inativo</span>' : ''}
+      ${u.id !== currentUser?.id ? `<button class="btn btn-danger btn-sm" onclick="toggleUserActive('${u.id}',${u.active})">${u.active?'Desativar':'Ativar'}</button>` : ''}
+    </div>`).join('') : '<div style="padding:20px;text-align:center;color:var(--text-3);">Nenhum usuário.</div>';
 }
 
-/* ============================================================
-   IMPORTAR EXCEL
-============================================================ */
+function openUserModal() {
+  document.getElementById('u-name').value = '';
+  document.getElementById('u-email').value = '';
+  document.getElementById('u-pass').value = '';
+  document.getElementById('u-role').value = 'user';
+  document.getElementById('modal-user').classList.add('open');
+}
+
+async function saveUser() {
+  const name  = document.getElementById('u-name').value.trim();
+  const email = document.getElementById('u-email').value.trim();
+  const pass  = document.getElementById('u-pass').value;
+  const role  = document.getElementById('u-role').value;
+  if (!name||!email||!pass) { toast('Preencha todos os campos.'); return; }
+  if (pass.length<6) { toast('Senha mínima de 6 caracteres.'); return; }
+  document.getElementById('modal-user').classList.remove('open');
+  showLoading();
+  const {data, error} = await sb.rpc('create_app_user',{p_email:email,p_password:pass,p_name:name,p_role:role});
+  hideLoading();
+  if (error || data?.error) { toast('Erro: '+(data?.error||error?.message)); return; }
+  await logActivity('Criou Usuário','Usuário',data.id,name,`email: ${email}, role: ${role}`);
+  toast('Usuário criado!');
+  loadUsersPage();
+}
+
+async function toggleUserActive(uid, active) {
+  const {error} = await sb.from('profiles').update({active:!active}).eq('id',uid);
+  if (error) { toast('Erro ao alterar.'); return; }
+  toast(active ? 'Usuário desativado.' : 'Usuário ativado.');
+  loadUsersPage();
+}
+
+// ─── ACTIVITY REPORT ─────────────────────────────────────────
+let activityData = [];
+
+async function loadActivityReport() {
+  const from   = document.getElementById('act-from').value;
+  const to     = document.getElementById('act-to').value;
+  const action = document.getElementById('act-action').value;
+  let query = sb.from('activity_logs').select('*').order('created_at',{ascending:false}).limit(500);
+  if (from) query = query.gte('created_at', from+'T00:00:00');
+  if (to)   query = query.lte('created_at', to+'T23:59:59');
+  if (action) query = query.eq('action', action);
+  const {data, error} = await query;
+  activityData = data || [];
+  const tbody = document.getElementById('activity-tbody');
+  if (!activityData.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text-3);">Nenhum registro encontrado.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = activityData.map(r=>`<tr>
+    <td style="white-space:nowrap;">${fmtDate(r.created_at)}</td>
+    <td>${r.user_name||r.user_email||'—'}</td>
+    <td><span class="badge s-contato">${r.action}</span></td>
+    <td>${r.entity||'—'}</td>
+    <td>${r.entity_name||'—'}</td>
+    <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${r.details||'—'}</td>
+  </tr>`).join('');
+}
+
+function exportActivityCSV() {
+  if (!activityData.length) { toast('Nenhum dado para exportar.'); return; }
+  const hdr = ['Data/Hora','Usuário','Email','Ação','Entidade','Nome','Detalhes'];
+  const rows = activityData.map(r=>[fmtDate(r.created_at),r.user_name||'',r.user_email||'',r.action,r.entity||'',r.entity_name||'',r.details||'']);
+  downloadCSV('atividade.csv', [hdr,...rows]);
+}
+
+// ─── LOGINS REPORT ───────────────────────────────────────────
+let loginsData = [];
+
+async function loadLoginsReport() {
+  const from = document.getElementById('log-from').value;
+  const to   = document.getElementById('log-to').value;
+  const user = document.getElementById('log-user').value.trim().toLowerCase();
+  let query = sb.from('login_logs').select('*').order('created_at',{ascending:false}).limit(500);
+  if (from) query = query.gte('created_at', from+'T00:00:00');
+  if (to)   query = query.lte('created_at', to+'T23:59:59');
+  const {data, error} = await query;
+  loginsData = (data||[]).filter(r=>!user || (r.user_name||'').toLowerCase().includes(user) || (r.user_email||'').toLowerCase().includes(user));
+  const tbody = document.getElementById('logins-tbody');
+  if (!loginsData.length) {
+    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:30px;color:var(--text-3);">Nenhum registro encontrado.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = loginsData.map(r=>`<tr>
+    <td style="white-space:nowrap;">${fmtDate(r.created_at)}</td>
+    <td>${r.user_name||'—'}</td>
+    <td>${r.user_email||'—'}</td>
+  </tr>`).join('');
+}
+
+function exportLoginsCSV() {
+  if (!loginsData.length) { toast('Nenhum dado para exportar.'); return; }
+  const hdr = ['Data/Hora','Usuário','E-mail'];
+  const rows = loginsData.map(r=>[fmtDate(r.created_at),r.user_name||'',r.user_email||'']);
+  downloadCSV('logins.csv', [hdr,...rows]);
+}
+
+// ─── HELPERS ─────────────────────────────────────────────────
+function fmtDate(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  return d.toLocaleDateString('pt-BR')+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+}
+
+function downloadCSV(filename, rows) {
+  const csv = rows.map(r=>r.map(c=>'"'+(String(c||'').replace(/"/g,'""'))+'"').join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'}));
+  a.download = filename; a.click();
+}
+
+function toast(msg, duration=3000) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), duration);
+}
+
+function showLoading() { document.getElementById('loading').classList.add('active'); }
+function hideLoading() { document.getElementById('loading').classList.remove('active'); }
+
+// ─── IMPORT ──────────────────────────────────────────────────
 const CRM_FIELDS = [
-  { id:'name',    label:'Nome *',      required:true  },
-  { id:'phone',   label:'Telefone *',  required:true  },
-  { id:'email',   label:'E-mail',      required:false },
-  { id:'company', label:'Empresa',     required:false },
-  { id:'equip',   label:'Equipamento', required:false },
-  { id:'status',  label:'Status',      required:false },
-  { id:'note',    label:'Anotações',   required:false },
+  {key:'name',  label:'Nome',        required:true},
+  {key:'phone', label:'Telefone',    required:false},
+  {key:'email', label:'E-mail',      required:false},
+  {key:'company',label:'Empresa',    required:false},
+  {key:'note',  label:'Nota',        required:false},
 ];
-const FIELD_HINTS = {
-  name:    ['nome','name','contato','cliente','lead'],
-  phone:   ['telefone','fone','celular','phone','tel','whatsapp','cel'],
-  email:   ['email','e-mail','mail'],
-  company: ['empresa','company','organização','org'],
-  equip:   ['equipamento','equip','produto','maquina','máquina'],
-  status:  ['status','etapa','fase','situação','situacao'],
-  note:    ['anotação','anotacao','nota','obs','observação','note','comentário'],
-};
-let importStep=1, importRows=[], importHeaders=[], importMapping={};
 
-function openImportModal() {
-  importStep=1; importRows=[]; importHeaders=[]; importMapping={};
-  document.getElementById('fileInput').value='';
-  resetDZ(); setImportStep(1);
-  document.getElementById('importModal').classList.add('open');
+function openImport() {
+  importStep=1; importRows=[]; importHeaders=[];
+  document.querySelectorAll('.import-step').forEach((s,i)=>s.classList.toggle('active',i===0));
+  document.getElementById('imp-btn-back').style.display='none';
+  document.getElementById('imp-btn-next').textContent='Próximo →';
+  document.getElementById('file-input').value='';
+  document.getElementById('modal-import').classList.add('open');
 }
-function closeImportModal() { document.getElementById('importModal').classList.remove('open'); }
-function dzOver(e)  { e.preventDefault(); document.getElementById('dropZone').classList.add('dragover'); }
-function dzLeave(e) { document.getElementById('dropZone').classList.remove('dragover'); }
-function dzDrop(e)  { e.preventDefault(); dzLeave(e); if(e.dataTransfer.files[0]) processFile(e.dataTransfer.files[0]); }
-function handleFile(input) { if(input.files[0]) processFile(input.files[0]); }
 
-function processFile(file) {
-  const ext=file.name.split('.').pop().toLowerCase();
-  if(!['xls','xlsx','csv'].includes(ext)) { showToast('Formato inválido','error'); return; }
-  document.getElementById('dropZone').innerHTML=`<div class="dz-icon">⏳</div><div class="dz-title">Lendo arquivo...</div>`;
-  const reader=new FileReader();
-  reader.onload=e=>{
-    try {
-      const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
-      const json=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''});
-      if(!json.length) { showToast('Planilha vazia','error'); resetDZ(); return; }
-      importHeaders=Object.keys(json[0]); importRows=json;
-      document.getElementById('dropZone').innerHTML=`<div class="dz-icon">✅</div><div class="dz-title" style="color:#16a34a;">${file.name}</div><div class="dz-sub">${json.length} linha(s) · ${importHeaders.length} coluna(s)</div>`;
-      autoDetectMapping();
-      document.getElementById('importBtnNext').textContent='Mapear Colunas →';
-    } catch(err) { showToast('Erro ao ler: '+err.message,'error'); resetDZ(); }
+function closeImport() { document.getElementById('modal-import').classList.remove('open'); }
+
+function handleFileDrop(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.remove('drag');
+  const file = e.dataTransfer.files[0];
+  if (file) processImportFile(file);
+}
+
+function handleFileSelect(e) {
+  const file = e.target.files[0];
+  if (file) processImportFile(file);
+}
+
+function processImportFile(file) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const wb = XLSX.read(e.target.result, {type:'array'});
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const data = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
+    if (!data.length) { toast('Planilha vazia.'); return; }
+    importHeaders = data[0].map(String);
+    importRows = data.slice(1).filter(r=>r.some(c=>c!==''));
+    importNext();
   };
   reader.readAsArrayBuffer(file);
 }
-function resetDZ() { document.getElementById('dropZone').innerHTML=`<div class="dz-icon">📂</div><div class="dz-title">Arraste sua planilha aqui</div><div class="dz-sub">ou clique para selecionar</div><div class="dz-types">Aceita: .xls · .xlsx · .csv</div>`; }
-function autoDetectMapping() {
-  CRM_FIELDS.forEach(f=>{ const h=FIELD_HINTS[f.id]||[]; importMapping[f.id]=importHeaders.find(h2=>h.some(hint=>h2.toLowerCase().includes(hint)))||'__ignore__'; });
-}
-function renderMapTable() {
-  const sample=importRows[0]||{};
-  document.getElementById('mapTableBody').innerHTML=CRM_FIELDS.map(f=>{
-    const sel=importMapping[f.id]||'__ignore__';
-    return `<tr><td><strong>${f.label}</strong></td>
-      <td><select onchange="importMapping['${f.id}']=this.value;document.getElementById('sample-${f.id}').textContent=this.value!='__ignore__'?String(sample[this.value]||'—').slice(0,50):'—'">
-        <option value="__ignore__">— Ignorar —</option>
-        ${importHeaders.map(h=>`<option value="${h}" ${h===sel?'selected':''}>${h}</option>`).join('')}
-      </select></td>
-      <td class="map-sample" id="sample-${f.id}">${esc(String(sel!=='__ignore__'?(sample[sel]??'—'):'—').slice(0,50))}</td>
-    </tr>`;
-  }).join('');
-  document.getElementById('import-file-info').textContent=`${importRows.length} linha(s) · ${importHeaders.length} coluna(s). Mapeie os campos abaixo.`;
-}
-function renderPreview() {
-  const mapped=CRM_FIELDS.filter(f=>importMapping[f.id]!=='__ignore__');
-  document.getElementById('previewHead').innerHTML='<tr>'+mapped.map(f=>`<th>${f.label.replace(' *','')}</th>`).join('')+'</tr>';
-  document.getElementById('previewBody').innerHTML=importRows.slice(0,8).map(row=>'<tr>'+mapped.map(f=>`<td>${esc(String(row[importMapping[f.id]]??'').slice(0,40))}</td>`).join('')+'</tr>').join('');
-  document.getElementById('import-preview-info').innerHTML=`<strong>${importRows.length} lead${importRows.length!==1?'s':''}</strong> prontos para importar.${importRows.length>8?' Mostrando os 8 primeiros.':''}`;
-}
+
 function importNext() {
-  if(importStep===1) { if(!importRows.length){showToast('Carregue um arquivo primeiro','error');return;} renderMapTable(); setImportStep(2); }
-  else if(importStep===2) {
-    const miss=CRM_FIELDS.filter(f=>f.required&&importMapping[f.id]==='__ignore__');
-    if(miss.length){showToast('Mapeie: '+miss.map(f=>f.label).join(', '),'error');return;}
-    renderPreview(); setImportStep(3);
-  } else if(importStep===3) { doImport(); }
-}
-function importBack() { if(importStep===2)setImportStep(1); else if(importStep===3)setImportStep(2); }
-function setImportStep(n) {
-  importStep=n;
-  [1,2,3].forEach(i=>{ document.getElementById('import-step'+i).style.display=i===n?'':'none'; const el=document.getElementById('istep-'+i); el.classList.remove('active','done'); if(i===n)el.classList.add('active'); if(i<n)el.classList.add('done'); });
-  [1,2].forEach(i=>document.getElementById('sline-'+i).classList.toggle('done',i<n));
-  document.getElementById('importBtnBack').style.display=n>1?'':'none';
-  const btn=document.getElementById('importBtnNext');
-  if(n===1)btn.textContent=importRows.length?'Mapear Colunas →':'Próximo →';
-  if(n===2)btn.textContent='Pré-visualizar →';
-  if(n===3)btn.textContent=`⬆ Importar ${importRows.length} lead(s)`;
+  if (importStep===1 && !importRows.length) { toast('Selecione um arquivo primeiro.'); return; }
+  importStep++;
+  if (importStep===2) showMappingStep();
+  else if (importStep===3) showPreviewStep();
+  else if (importStep===4) runImport();
+  updateImportNav();
 }
 
-async function doImport() {
-  const statusMap={}; STATUSES.forEach(s=>{statusMap[s.id]=s.id;statusMap[s.label.toLowerCase()]=s.id;});
-  const equipMap={};  equipments.forEach(e=>{equipMap[e.id]=e.id;equipMap[e.label.toLowerCase()]=e.id;});
-  const matchVal=(raw,map)=>{ if(!raw)return null; const r=raw.toLowerCase(); if(map[r])return map[r]; for(const[k,v]of Object.entries(map))if(r.includes(k)||k.includes(r))return v; return null; };
+function importBack() {
+  importStep--;
+  if (importStep<1) importStep=1;
+  document.querySelectorAll('.import-step').forEach((s,i)=>s.classList.toggle('active',i===importStep-1));
+  updateImportNav();
+}
 
-  const batch=[]; let skipped=0;
-  importRows.forEach(row=>{
-    const name=String(row[importMapping.name]??'').trim();
-    const phone=String(row[importMapping.phone]??'').trim();
-    if(!name&&!phone){skipped++;return;}
-    batch.push({
-      id: uid(),
-      name: name||phone, phone,
-      email:   importMapping.email   !=='__ignore__'?String(row[importMapping.email]??'').trim():'',
-      company: importMapping.company !=='__ignore__'?String(row[importMapping.company]??'').trim():'',
-      note:    importMapping.note    !=='__ignore__'?String(row[importMapping.note]??'').trim():'',
-      equip:   matchVal(importMapping.equip!=='__ignore__'?String(row[importMapping.equip]??''):'',equipMap)||equipments[0]?.id||'ultracell',
-      status:  matchVal(importMapping.status!=='__ignore__'?String(row[importMapping.status]??''):'',statusMap)||'novo',
-      created_at: new Date().toISOString(),
-    });
+function updateImportNav() {
+  document.querySelectorAll('.import-step').forEach((s,i)=>s.classList.toggle('active',i===importStep-1));
+  document.getElementById('imp-btn-back').style.display = importStep>1&&importStep<4 ? '' : 'none';
+  const nextBtn = document.getElementById('imp-btn-next');
+  if (importStep===3) { nextBtn.textContent='Importar ✅'; }
+  else if (importStep>=4) { nextBtn.style.display='none'; }
+  else { nextBtn.textContent='Próximo →'; nextBtn.style.display=''; }
+}
+
+function showMappingStep() {
+  const container = document.getElementById('mapping-rows');
+  container.innerHTML = CRM_FIELDS.map(f=>`
+    <div class="map-row">
+      <div class="map-col-label">${f.label}${f.required?' *':''}</div>
+      <div style="text-align:center;color:var(--text-3);">→</div>
+      <select id="map-${f.key}" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:6px;font-size:13px;width:100%;outline:none;">
+        <option value="">— ignorar —</option>
+        ${importHeaders.map((h,i)=>`<option value="${i}" ${h.toLowerCase().includes(f.label.toLowerCase())||h.toLowerCase()===f.key?'selected':''}>${h}</option>`).join('')}
+      </select>
+    </div>`).join('');
+}
+
+function showPreviewStep() {
+  const mapping = {};
+  CRM_FIELDS.forEach(f=>{ const v=document.getElementById('map-'+f.key)?.value; if(v!=='') mapping[f.key]=parseInt(v); });
+  if (mapping.name===undefined) { toast('Mapeie o campo Nome.'); importStep=2; updateImportNav(); return; }
+  const preview = importRows.slice(0,5).map(r=>{
+    const obj={};
+    CRM_FIELDS.forEach(f=>{ if(mapping[f.key]!==undefined) obj[f.key]=r[mapping[f.key]]||''; });
+    return obj;
   });
+  document.getElementById('preview-info').textContent = `${importRows.length} linhas encontradas. Pré-visualização (5 primeiras):`;
+  document.getElementById('preview-thead').innerHTML = '<tr>'+CRM_FIELDS.filter(f=>mapping[f.key]!==undefined).map(f=>`<th>${f.label}</th>`).join('')+'</tr>';
+  document.getElementById('preview-tbody').innerHTML = preview.map(r=>'<tr>'+CRM_FIELDS.filter(f=>mapping[f.key]!==undefined).map(f=>`<td>${r[f.key]||''}</td>`).join('')+'</tr>').join('');
+  window._importMapping = mapping;
+}
 
-  if(!batch.length){showToast('Nenhum dado válido encontrado','error');return;}
-  showLoader(`Importando ${batch.length} leads...`);
-  closeImportModal();
-  setSyncBadge('syncing','⏳ Importando');
-
-  // inserir em lotes de 100
-  for(let i=0;i<batch.length;i+=100){
-    const { error } = await sb.from('leads').insert(batch.slice(i,i+100));
-    if(error){hideLoader();showToast('Erro na importação: '+error.message,'error');setSyncBadge('error','⚠ Erro');return;}
+async function runImport() {
+  document.getElementById('imp-btn-next').style.display='none';
+  const mapping = window._importMapping||{};
+  const total = importRows.length;
+  let done=0, errors=0;
+  for (const row of importRows) {
+    const obj={};
+    CRM_FIELDS.forEach(f=>{ if(mapping[f.key]!==undefined) obj[f.key]=String(row[mapping[f.key]]||'').trim(); });
+    if (!obj.name) { errors++; done++; continue; }
+    const id = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36)+Math.random().toString(36).slice(2);
+    const equip = equips[0]?.id || '';
+    await sb.from('leads').insert({id, name:obj.name, phone:obj.phone||'', email:obj.email||'', company:obj.company||'', note:obj.note||'', equip, status:'novo', created_at:new Date().toISOString(), updated_at:new Date().toISOString()});
+    done++;
+    const pct = Math.round((done/total)*100);
+    document.getElementById('imp-prog-bar').style.width = pct+'%';
+    document.getElementById('imp-prog-count').textContent = `${done} / ${total}`;
   }
-
-  leads = [...batch, ...leads];
-  hideLoader();
-  setSyncBadge('ok','☁ Conectado');
-  renderAll();
-  showToast(`${batch.length} lead${batch.length!==1?'s':''} importado${batch.length!==1?'s':''}${skipped?' · '+skipped+' ignorado(s)':''}`, 'success');
+  await logActivity('Importou Leads','Lead',null,null,`${done-errors} importados, ${errors} erros`);
+  document.getElementById('imp-prog-text').textContent = `✅ Importação concluída! ${done-errors} leads importados${errors?' ('+errors+' ignorados)':''}.`;
+  await loadLeads(); renderAll();
+  setTimeout(closeImport, 2500);
 }
-
-/* ============================================================
-   UTILS
-============================================================ */
-function maskPhone(el) {
-  let v=el.value.replace(/\D/g,'').slice(0,11);
-  if(v.length>6) v=v.replace(/^(\d{2})(\d{5})(\d*)$/,'($1) $2-$3');
-  else if(v.length>2) v=v.replace(/^(\d{2})(\d*)$/,'($1) $2');
-  el.value=v;
-}
-let _tt;
-function showToast(msg,type='success') {
-  const el=document.getElementById('toast');
-  el.innerHTML=(type==='success'?'✓':'⚠')+'&nbsp; '+msg;
-  el.className=`toast ${type} show`;
-  clearTimeout(_tt); _tt=setTimeout(()=>el.classList.remove('show'),3000);
-}
-['leadModal','equipModal','importModal'].forEach(id=>{
-  document.getElementById(id).addEventListener('click',e=>{ if(e.target.id===id) e.target.classList.remove('open'); });
-});
-document.addEventListener('keydown',e=>{ if(e.key==='Escape') document.querySelectorAll('.overlay.open').forEach(m=>m.classList.remove('open')); });
-
-/* ============================================================
-   BOOT
-============================================================ */
-init().then(() => startRealtime());
 </script>
 </body>
 </html>
