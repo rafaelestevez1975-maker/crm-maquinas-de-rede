@@ -1024,18 +1024,26 @@ async function saveLead() {
   const status = document.getElementById('f-status').value;
   const note   = document.getElementById('f-note').value.trim();
   if (!name) { toast('Nome obrigatório.'); return; }
+
+  // Captura referência ANTES de fechar o modal (closeLeadModal zera editingLead)
+  const leadParaEditar = editingLead;
+  const isNew = !leadParaEditar;
   closeLeadModal();
-  const isNew = !editingLead;
-  if (editingLead) {
-    const {error} = await sb.from('leads').update({name,phone,email,company,equip,status,note,updated_at:new Date().toISOString()}).eq('id',editingLead.id);
-    if (error) { toast('Erro ao salvar.'); return; }
-    await logActivity('Editou Lead','Lead',editingLead.id,name,`status: ${status}`);
+
+  if (leadParaEditar) {
+    const {error} = await sb.from('leads')
+      .update({name, phone, email, company, equip, status, note, updated_at: new Date().toISOString()})
+      .eq('id', leadParaEditar.id);
+    if (error) { toast('Erro ao salvar: ' + error.message); return; }
+    await logActivity('Editou Lead','Lead', leadParaEditar.id, name, `status: ${status}`);
   } else {
-    const id = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36);
-    const {error} = await sb.from('leads').insert({id,name,phone,email,company,equip,status,note,created_at:new Date().toISOString(),updated_at:new Date().toISOString()});
-    if (error) { toast('Erro ao criar lead.'); return; }
-    await logActivity('Criou Lead','Lead',id,name,`equip: ${equip}, status: ${status}`);
+    const id = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2);
+    const {error} = await sb.from('leads')
+      .insert({id, name, phone, email, company, equip, status, note, created_at: new Date().toISOString(), updated_at: new Date().toISOString()});
+    if (error) { toast('Erro ao criar lead: ' + error.message); return; }
+    await logActivity('Criou Lead','Lead', id, name, `equip: ${equip}, status: ${status}`);
   }
+
   toast(isNew ? 'Lead criado!' : 'Lead atualizado!');
   await loadLeads(); renderAll();
 }
@@ -1085,17 +1093,21 @@ async function saveEquip() {
   const label = document.getElementById('eq-label').value.trim();
   const color = document.getElementById('eq-color').value;
   if (!label) { toast('Nome obrigatório.'); return; }
+
+  // Captura referência ANTES de fechar o modal (closeEquipModal zera editingEquip)
+  const equipParaEditar = editingEquip;
+  const isNew = !equipParaEditar;
   closeEquipModal();
-  const isNew = !editingEquip;
-  if (editingEquip) {
-    const {error} = await sb.from('equipamentos').update({label,color}).eq('id',editingEquip.id);
-    if (error) { toast('Erro ao salvar.'); return; }
-    await logActivity('Editou Equipamento','Equipamento',editingEquip.id,label,`cor: ${color}`);
+
+  if (equipParaEditar) {
+    const {error} = await sb.from('equipamentos').update({label, color}).eq('id', equipParaEditar.id);
+    if (error) { toast('Erro ao salvar: ' + error.message); return; }
+    await logActivity('Editou Equipamento','Equipamento', equipParaEditar.id, label, `cor: ${color}`);
   } else {
     const id = label.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]/g,'_').slice(0,30)+'_'+Date.now().toString(36).slice(-4);
-    const {error} = await sb.from('equipamentos').insert({id,label,color,created_at:new Date().toISOString()});
-    if (error) { toast('Erro ao criar.'); return; }
-    await logActivity('Criou Equipamento','Equipamento',id,label,`cor: ${color}`);
+    const {error} = await sb.from('equipamentos').insert({id, label, color, created_at: new Date().toISOString()});
+    if (error) { toast('Erro ao criar: ' + error.message); return; }
+    await logActivity('Criou Equipamento','Equipamento', id, label, `cor: ${color}`);
   }
   toast(isNew ? 'Tipo de Lead criado!' : 'Tipo de Lead atualizado!');
   await loadEquips(); renderAll();
