@@ -1,7 +1,7 @@
 {
-  "name": "CRM Franquias e Máquinas",
-  "short_name": "CRM Franquias",
-  "description": "Sistema de CRM para gestão de leads de franquias e máquinas de rede",
+  "name": "Gestão de Máquinas",
+  "short_name": "Gestão de Máquinas",
+  "description": "Sistema de gestão de leads e funil de vendas para máquinas e franquias",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#1e2d6b",
