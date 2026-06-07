@@ -318,7 +318,7 @@ tr:hover td { background:#fafbff; }
 
     <div class="sidebar-section">Cadastros</div>
     <div class="nav-item" data-page="equipamentos" onclick="navTo('equipamentos',this)">
-      <span class="nav-icon">🔧</span> Equipamentos
+      <span class="nav-icon">🏷️</span> Tipo de Lead
     </div>
     <div class="nav-item admin-only hidden" data-page="usuarios" onclick="navTo('usuarios',this)">
       <span class="nav-icon">👥</span> Usuários
@@ -373,13 +373,13 @@ tr:hover td { background:#fafbff; }
       <div class="card-body" style="display:flex;justify-content:center;align-items:center;min-height:220px;"><canvas id="chartStatus" height="200"></canvas></div>
     </div>
     <div class="card">
-      <div class="card-header"><div><div class="card-title">Leads por Equipamento</div><div class="card-sub">Distribuição por tipo</div></div></div>
+      <div class="card-header"><div><div class="card-title">Leads por Tipo</div><div class="card-sub">Distribuição por tipo de lead</div></div></div>
       <div class="card-body" style="display:flex;justify-content:center;align-items:center;min-height:220px;"><canvas id="chartEquip" height="200"></canvas></div>
     </div>
   </div>
   <div class="dash-grid-3">
     <div class="card">
-      <div class="card-header"><div><div class="card-title">Status × Equipamento</div><div class="card-sub">Composição empilhada</div></div></div>
+      <div class="card-header"><div><div class="card-title">Status × Tipo de Lead</div><div class="card-sub">Composição empilhada</div></div></div>
       <div class="card-body"><canvas id="chartBar" height="140"></canvas></div>
     </div>
     <div class="card">
@@ -400,7 +400,7 @@ tr:hover td { background:#fafbff; }
   </div>
   <div class="card">
     <div class="card-header"><div class="card-title" id="funnel-detail-title">Todos os Leads</div></div>
-    <div class="list-table-wrap"><table><thead><tr><th>Nome</th><th>Telefone</th><th>Equipamento</th><th>Status</th><th>Nota</th><th></th></tr></thead><tbody id="funnel-tbody"></tbody></table></div>
+    <div class="list-table-wrap"><table><thead><tr><th>Nome</th><th>Telefone</th><th>Tipo de Lead</th><th>Status</th><th>Nota</th><th></th></tr></thead><tbody id="funnel-tbody"></tbody></table></div>
   </div>
 </div>
 
@@ -411,7 +411,7 @@ tr:hover td { background:#fafbff; }
   </div>
   <div id="list-view" style="display:none;">
     <div class="card list-table-wrap">
-      <table><thead><tr><th>Nome</th><th>Telefone</th><th>E-mail</th><th>Empresa</th><th>Equipamento</th><th>Status</th><th>Nota</th><th></th></tr></thead>
+      <table><thead><tr><th>Nome</th><th>Telefone</th><th>E-mail</th><th>Empresa</th><th>Tipo de Lead</th><th>Status</th><th>Nota</th><th></th></tr></thead>
       <tbody id="list-tbody"></tbody></table>
     </div>
   </div>
@@ -421,7 +421,7 @@ tr:hover td { background:#fafbff; }
 <div class="page" id="page-equipamentos">
   <div class="card">
     <div class="card-header">
-      <div><div class="card-title">Equipamentos Cadastrados</div><div class="card-sub">Gerencie os tipos de equipamento</div></div>
+      <div><div class="card-title">Tipos de Lead Cadastrados</div><div class="card-sub">Gerencie os tipos de lead</div></div>
       <button class="btn btn-primary btn-sm" onclick="openEquipModal()">＋ Novo</button>
     </div>
     <div class="equip-list" id="equip-list"></div>
@@ -530,7 +530,7 @@ tr:hover td { background:#fafbff; }
       <div class="form-group"><label>Empresa</label><input id="f-company" placeholder="Nome da empresa"></div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label>Equipamento *</label>
+      <div class="form-group"><label>Tipo de Lead *</label>
         <select id="f-equip"></select>
       </div>
       <div class="form-group"><label>Status *</label>
@@ -557,7 +557,7 @@ tr:hover td { background:#fafbff; }
 <!-- MODAL EQUIP -->
 <div class="overlay" id="modal-equip">
   <div class="modal" style="max-width:380px;">
-    <h2 id="modal-equip-title">Novo Equipamento</h2>
+    <h2 id="modal-equip-title">Novo Tipo de Lead</h2>
     <div class="form-group"><label>Nome *</label><input id="eq-label" placeholder="Ex: Quanta Pro"></div>
     <div class="form-group"><label>Cor</label>
       <div class="color-swatch" id="color-swatch"></div>
@@ -765,7 +765,7 @@ const PAGE_META = {
   dashboard:     { title:'Dashboard',       sub:'Visão geral' },
   funnel:        { title:'Funil de Vendas', sub:'Pipeline de leads' },
   list:          { title:'Leads',           sub:'Gerencie seus contatos' },
-  equipamentos:  { title:'Equipamentos',    sub:'Cadastros de equipamentos' },
+  equipamentos:  { title:'Tipo de Lead',     sub:'Cadastros de tipos de lead' },
   usuarios:      { title:'Usuários',        sub:'Gerenciamento de acesso' },
   'rel-atividade':{ title:'Atividade',      sub:'Log de ações no sistema' },
   'rel-logins':  { title:'Logins',          sub:'Histórico de acessos' },
@@ -1058,7 +1058,7 @@ async function deleteLead(id) {
 // ─── EQUIP MODAL ─────────────────────────────────────────────
 function openEquipModal(eq=null) {
   editingEquip = eq;
-  document.getElementById('modal-equip-title').textContent = eq ? 'Editar Equipamento' : 'Novo Equipamento';
+  document.getElementById('modal-equip-title').textContent = eq ? 'Editar Tipo de Lead' : 'Novo Tipo de Lead';
   document.getElementById('eq-label').value = eq?.label||'';
   document.getElementById('eq-color').value = eq?.color||'#1b5e20';
   renderSwatches(eq?.color||'#1b5e20');
@@ -1097,7 +1097,7 @@ async function saveEquip() {
     if (error) { toast('Erro ao criar.'); return; }
     await logActivity('Criou Equipamento','Equipamento',id,label,`cor: ${color}`);
   }
-  toast(isNew ? 'Equipamento criado!' : 'Equipamento atualizado!');
+  toast(isNew ? 'Tipo de Lead criado!' : 'Tipo de Lead atualizado!');
   await loadEquips(); renderAll();
 }
 
@@ -1112,16 +1112,16 @@ function renderEquipList() {
         <button class="btn btn-ghost btn-sm" onclick="openEquipModal(${JSON.stringify(e).replace(/"/g,'&quot;')})">✏️</button>
         <button class="btn btn-danger btn-sm" onclick="deleteEquip('${e.id}')">🗑</button>
       </div>
-    </div>`).join('') : '<div style="padding:20px;text-align:center;color:var(--text-3);">Nenhum equipamento cadastrado.</div>';
+    </div>`).join('') : '<div style="padding:20px;text-align:center;color:var(--text-3);">Nenhum tipo de lead cadastrado.</div>';
 }
 
 async function deleteEquip(id) {
-  if (!confirm('Excluir este equipamento?')) return;
+  if (!confirm('Excluir este tipo de lead?')) return;
   const eq = equips.find(x=>x.id===id);
   const {error} = await sb.from('equipamentos').delete().eq('id',id);
   if (error) { toast('Erro ao excluir.'); return; }
   await logActivity('Removeu Equipamento','Equipamento',id,eq?.label||id,null);
-  toast('Equipamento removido.');
+  toast('Tipo de Lead removido.');
   await loadEquips(); renderAll();
 }
 
