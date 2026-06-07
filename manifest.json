@@ -1,7 +1,7 @@
 {
-  "name": "Gestão de Máquinas",
-  "short_name": "Gestão de Máquinas",
-  "description": "Sistema de gestão de leads e funil de vendas para máquinas e franquias",
+  "name": "Funil de Vendas Franquias e Máquinas",
+  "short_name": "Funil Franquias",
+  "description": "Sistema de funil de vendas para gestão de leads de franquias e máquinas",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#1e2d6b",

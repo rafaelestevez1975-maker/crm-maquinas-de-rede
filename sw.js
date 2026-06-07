@@ -1,5 +1,5 @@
-// CRM Franquias e Máquinas — Service Worker v1.0
-const CACHE_NAME = 'crm-franquias-v1';
+// Funil de Vendas Franquias e Máquinas — Service Worker v3.0
+const CACHE_NAME = 'funil-vendas-v3';
 
 // Assets to cache on install (app shell)
 const SHELL_ASSETS = [

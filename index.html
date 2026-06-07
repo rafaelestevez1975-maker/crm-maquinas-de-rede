@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Gestão de Máquinas</title>
+<title>Funil de Vendas Franquias e Máquinas</title>
 
 <!-- PWA -->
 <link rel="manifest" href="/manifest.json">
@@ -11,13 +11,13 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Gestão de Máquinas">
+<meta name="apple-mobile-web-app-title" content="Funil de Vendas Franquias e Máquinas">
 <link rel="apple-touch-icon" href="/icons/icon.svg">
 <link rel="icon" type="image/svg+xml" href="/icons/icon.svg">
 
 <!-- SEO -->
 <meta name="description" content="CRM para gestão de leads de franquias e máquinas de rede">
-<meta name="application-name" content="Gestão de Máquinas">
+<meta name="application-name" content="Funil de Vendas Franquias e Máquinas">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -276,7 +276,7 @@ tr:hover td { background:#fafbff; }
   <div class="login-card">
     <div class="login-logo">
       <div class="login-logo-icon">🖧</div>
-      <h1>Gestão de Máquinas</h1>
+      <h1>Funil de Vendas</h1>
       <p>Faça login para continuar</p>
     </div>
     <div class="login-field">
@@ -300,8 +300,8 @@ tr:hover td { background:#fafbff; }
   <div class="sidebar-logo">
     <div class="logo-icon">🖧</div>
     <div>
-      <div class="logo-text">Gestão de</div>
-      <div class="logo-sub">Máquinas</div>
+      <div class="logo-text">Funil de Vendas</div>
+      <div class="logo-sub">Franquias e Máquinas</div>
     </div>
   </div>
   <nav class="sidebar-nav">
@@ -1025,25 +1025,26 @@ async function saveLead() {
   const note   = document.getElementById('f-note').value.trim();
   if (!name) { toast('Nome obrigatório.'); return; }
 
-  // Captura referência ANTES de fechar o modal (closeLeadModal zera editingLead)
-  const leadParaEditar = editingLead;
-  const isNew = !leadParaEditar;
+  // Captura o ID ANTES de fechar o modal
+  const idExistente = editingLead ? editingLead.id : null;
+  const isNew = !idExistente;
   closeLeadModal();
 
-  if (leadParaEditar) {
-    const {error} = await sb.from('leads')
-      .update({name, phone, email, company, equip, status, note, updated_at: new Date().toISOString()})
-      .eq('id', leadParaEditar.id);
-    if (error) { toast('Erro ao salvar: ' + error.message); return; }
-    await logActivity('Editou Lead','Lead', leadParaEditar.id, name, `status: ${status}`);
-  } else {
-    const id = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2);
-    const {error} = await sb.from('leads')
-      .insert({id, name, phone, email, company, equip, status, note, created_at: new Date().toISOString(), updated_at: new Date().toISOString()});
-    if (error) { toast('Erro ao criar lead: ' + error.message); return; }
-    await logActivity('Criou Lead','Lead', id, name, `equip: ${equip}, status: ${status}`);
-  }
+  const id = idExistente || (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2));
+  const now = new Date().toISOString();
 
+  // upsert: atualiza se o ID já existe, cria se não existe — nunca duplica
+  const {error} = await sb.from('leads').upsert(
+    { id, name, phone, email, company, equip, status, note, updated_at: now,
+      ...(isNew ? { created_at: now } : {}) },
+    { onConflict: 'id' }
+  );
+
+  if (error) { toast('Erro ao salvar: ' + error.message); return; }
+  await logActivity(
+    isNew ? 'Criou Lead' : 'Editou Lead', 'Lead', id, name,
+    isNew ? `equip: ${equip}, status: ${status}` : `status: ${status}`
+  );
   toast(isNew ? 'Lead criado!' : 'Lead atualizado!');
   await loadLeads(); renderAll();
 }
