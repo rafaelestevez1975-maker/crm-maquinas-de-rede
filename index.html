@@ -547,6 +547,7 @@ tr:hover td { background:#fafbff; }
       </div>
     </div>
     <div class="form-group"><label>Nota</label><textarea id="f-note" rows="3" placeholder="Observações…"></textarea></div>
+    <input type="hidden" id="f-lead-id" value="">
     <div class="modal-foot">
       <button class="btn btn-ghost" onclick="closeLeadModal()">Cancelar</button>
       <button class="btn btn-primary" onclick="saveLead()">Salvar</button>
@@ -997,43 +998,47 @@ function renderAll() {
 
 // ─── LEAD MODAL ──────────────────────────────────────────────
 function openLeadModal(lead=null) {
-  editingLead = lead;
+  // Grava o ID diretamente no formulário — elimina dependência de variável global
+  document.getElementById('f-lead-id').value  = lead?.id || '';
   document.getElementById('modal-lead-title').textContent = lead ? 'Editar Lead' : 'Novo Lead';
-  document.getElementById('f-name').value    = lead?.name||'';
-  document.getElementById('f-phone').value   = lead?.phone||'';
-  document.getElementById('f-email').value   = lead?.email||'';
-  document.getElementById('f-company').value = lead?.company||'';
-  document.getElementById('f-equip').value   = lead?.equip || equips[0]?.id || '';
-  document.getElementById('f-status').value  = lead?.status||'novo';
-  document.getElementById('f-note').value    = lead?.note||'';
+  document.getElementById('f-name').value    = lead?.name    || '';
+  document.getElementById('f-phone').value   = lead?.phone   || '';
+  document.getElementById('f-email').value   = lead?.email   || '';
+  document.getElementById('f-company').value = lead?.company || '';
+  document.getElementById('f-equip').value   = lead?.equip   || equips[0]?.id || '';
+  document.getElementById('f-status').value  = lead?.status  || 'novo';
+  document.getElementById('f-note').value    = lead?.note    || '';
   document.getElementById('modal-lead').classList.add('open');
-  setTimeout(()=>document.getElementById('f-name').focus(),100);
+  setTimeout(()=>document.getElementById('f-name').focus(), 100);
 }
 
 function closeLeadModal() {
   document.getElementById('modal-lead').classList.remove('open');
-  editingLead = null;
+  document.getElementById('f-lead-id').value = '';
 }
 
 async function saveLead() {
-  const name   = document.getElementById('f-name').value.trim();
-  const phone  = document.getElementById('f-phone').value.trim();
-  const email  = document.getElementById('f-email').value.trim();
-  const company= document.getElementById('f-company').value.trim();
-  const equip  = document.getElementById('f-equip').value;
-  const status = document.getElementById('f-status').value;
-  const note   = document.getElementById('f-note').value.trim();
+  const name    = document.getElementById('f-name').value.trim();
+  const phone   = document.getElementById('f-phone').value.trim();
+  const email   = document.getElementById('f-email').value.trim();
+  const company = document.getElementById('f-company').value.trim();
+  const equip   = document.getElementById('f-equip').value;
+  const status  = document.getElementById('f-status').value;
+  const note    = document.getElementById('f-note').value.trim();
+  // Lê o ID direto do campo oculto — nunca perde referência
+  const idExistente = document.getElementById('f-lead-id').value.trim();
+  const isNew   = !idExistente;
+
   if (!name) { toast('Nome obrigatório.'); return; }
 
-  // Captura o ID ANTES de fechar o modal
-  const idExistente = editingLead ? editingLead.id : null;
-  const isNew = !idExistente;
   closeLeadModal();
 
-  const id = idExistente || (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2));
+  const id  = isNew
+    ? (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2))
+    : idExistente;
   const now = new Date().toISOString();
 
-  // upsert: atualiza se o ID já existe, cria se não existe — nunca duplica
+  // upsert: atualiza se o ID já existe, cria se não existe — impossível duplicar
   const {error} = await sb.from('leads').upsert(
     { id, name, phone, email, company, equip, status, note, updated_at: now,
       ...(isNew ? { created_at: now } : {}) },
