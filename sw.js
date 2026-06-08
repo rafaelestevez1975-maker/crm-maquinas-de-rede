@@ -1,5 +1,5 @@
 // Funil de Vendas Franquias e Máquinas — Service Worker v3.0
-const CACHE_NAME = 'funil-vendas-v3';
+const CACHE_NAME = 'funil-vendas-v4';
 
 // Assets to cache on install (app shell)
 const SHELL_ASSETS = [
