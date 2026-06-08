@@ -659,40 +659,72 @@ async function doLogin() {
   const email = document.getElementById('login-email').value.trim();
   const pass  = document.getElementById('login-pass').value;
   const errEl = document.getElementById('login-error');
+  const btn   = document.querySelector('.login-btn');
   errEl.classList.remove('show');
   if (!email || !pass) { errEl.textContent='Preencha e-mail e senha.'; errEl.classList.add('show'); return; }
-  const {data, error} = await sb.auth.signInWithPassword({email, password:pass});
-  if (error) { errEl.textContent = error.message; errEl.classList.add('show'); return; }
-  await onLogin(data.user);
+
+  // Feedback visual no botão
+  btn.disabled = true;
+  btn.textContent = 'Entrando…';
+
+  try {
+    const {data, error} = await sb.auth.signInWithPassword({email, password: pass});
+    if (error) {
+      errEl.textContent = error.message === 'Invalid login credentials'
+        ? 'E-mail ou senha incorretos.'
+        : error.message;
+      errEl.classList.add('show');
+      return;
+    }
+    await onLogin(data.user);
+  } catch(e) {
+    errEl.textContent = 'Erro de conexão. Verifique sua internet.';
+    errEl.classList.add('show');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Entrar';
+  }
 }
 
 async function onLogin(user) {
   currentUser = user;
-  // load profile
-  const {data:prof} = await sb.from('profiles').select('*').eq('id', user.id).single();
-  currentProfile = prof;
-  // log login
   try {
-    await sb.from('login_logs').insert({
+    // Carrega perfil com timeout de 8 segundos
+    const profilePromise = sb.from('profiles').select('*').eq('id', user.id).single();
+    const timeoutPromise = new Promise((_,r) => setTimeout(() => r(new Error('timeout')), 8000));
+    const {data:prof} = await Promise.race([profilePromise, timeoutPromise]).catch(() => ({data: null}));
+    currentProfile = prof;
+
+    // Registra login (silencioso)
+    sb.from('login_logs').insert({
       user_id: user.id,
       user_email: user.email,
       user_name: prof?.name || user.email
-    });
-  } catch(e) {}
-  // update sidebar
-  const name = prof?.name || user.email;
-  const role = prof?.role || 'user';
-  document.getElementById('sb-name').textContent = name;
-  document.getElementById('sb-role').textContent = role === 'admin' ? 'Administrador' : 'Usuário';
-  document.getElementById('sb-avatar').textContent = name.charAt(0).toUpperCase();
-  // show admin sections
-  if (role === 'admin') {
-    document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
+    }).catch(() => {});
+
+    // Atualiza sidebar
+    const name = prof?.name || user.email;
+    const role = (prof?.role || 'user').toLowerCase();
+    document.getElementById('sb-name').textContent = name;
+    document.getElementById('sb-role').textContent = role === 'admin' ? 'Administrador' : 'Usuário';
+    document.getElementById('sb-avatar').textContent = name.charAt(0).toUpperCase();
+
+    if (role === 'admin') {
+      document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
+    }
+
+    // Troca de tela
+    document.getElementById('login-screen').classList.remove('active');
+    document.getElementById('app-wrap').classList.remove('hidden');
+
+    await loadAll();
+  } catch(e) {
+    console.error('Erro no onLogin:', e);
+    // Mesmo com erro, abre o app
+    document.getElementById('login-screen').classList.remove('active');
+    document.getElementById('app-wrap').classList.remove('hidden');
+    await loadAll();
   }
-  // switch screens
-  document.getElementById('login-screen').classList.remove('active');
-  document.getElementById('app-wrap').classList.remove('hidden');
-  await loadAll();
 }
 
 async function doLogout() {
@@ -708,28 +740,40 @@ async function doLogout() {
 
 // ─── INIT ────────────────────────────────────────────────────
 (async () => {
-  const {data:{session}} = await sb.auth.getSession();
-  if (session?.user) {
-    await onLogin(session.user);
+  // Enter no login
+  document.getElementById('login-pass').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+  document.getElementById('login-email').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+
+  try {
+    const {data:{session}} = await sb.auth.getSession();
+    if (session?.user) {
+      await onLogin(session.user);
+    }
+  } catch(e) {
+    console.warn('Sessão não encontrada, aguardando login.', e);
   }
-  // realtime
+
+  // Realtime (após autenticar)
   sb.channel('realtime-leads').on('postgres_changes',{event:'*',schema:'public',table:'leads'},async()=>{
     await loadLeads(); renderAll();
   }).subscribe();
   sb.channel('realtime-equips').on('postgres_changes',{event:'*',schema:'public',table:'equipamentos'},async()=>{
     await loadEquips(); renderAll();
   }).subscribe();
-  // listen enter on login
-  document.getElementById('login-pass').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
-  document.getElementById('login-email').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
 })();
 
 async function loadAll() {
   showLoading();
-  await loadEquips();
-  await loadLeads();
-  renderAll();
-  hideLoading();
+  try {
+    await loadEquips();
+    await loadLeads();
+    renderAll();
+  } catch(e) {
+    console.error('Erro ao carregar dados:', e);
+    toast('Erro ao carregar dados. Verifique sua conexão.');
+  } finally {
+    hideLoading();
+  }
 }
 
 async function loadLeads() {
