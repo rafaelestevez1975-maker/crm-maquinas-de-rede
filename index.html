@@ -688,14 +688,26 @@ async function doLogin() {
 
 async function onLogin(user) {
   currentUser = user;
+
+  // Garante que o app abre em no máximo 20s independente de qualquer erro
+  const hardTimeout = setTimeout(() => {
+    document.getElementById('login-screen').classList.remove('active');
+    document.getElementById('app-wrap').classList.remove('hidden');
+    hideLoading();
+  }, 20000);
+
   try {
-    // Carrega perfil com timeout de 8 segundos
-    const profilePromise = sb.from('profiles').select('*').eq('id', user.id).single();
-    const timeoutPromise = new Promise((_,r) => setTimeout(() => r(new Error('timeout')), 8000));
-    const {data:prof} = await Promise.race([profilePromise, timeoutPromise]).catch(() => ({data: null}));
+    // Carrega perfil com timeout de 6 segundos
+    let prof = null;
+    try {
+      const profilePromise = sb.from('profiles').select('*').eq('id', user.id).single();
+      const timeoutPromise = new Promise((_,r) => setTimeout(() => r(new Error('timeout')), 6000));
+      const res = await Promise.race([profilePromise, timeoutPromise]);
+      prof = res?.data || null;
+    } catch(e) { console.warn('Profile timeout:', e.message); }
     currentProfile = prof;
 
-    // Registra login (silencioso)
+    // Registra login (silencioso, sem await)
     sb.from('login_logs').insert({
       user_id: user.id,
       user_email: user.email,
@@ -717,10 +729,11 @@ async function onLogin(user) {
     document.getElementById('login-screen').classList.remove('active');
     document.getElementById('app-wrap').classList.remove('hidden');
 
+    clearTimeout(hardTimeout);
     await loadAll();
   } catch(e) {
     console.error('Erro no onLogin:', e);
-    // Mesmo com erro, abre o app
+    clearTimeout(hardTimeout);
     document.getElementById('login-screen').classList.remove('active');
     document.getElementById('app-wrap').classList.remove('hidden');
     await loadAll();
@@ -762,8 +775,16 @@ async function doLogout() {
   }).subscribe();
 })();
 
+// Helper: executa promise com timeout (ms). Retorna {data, error}.
+function withTimeout(promise, ms = 12000) {
+  const timer = new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), ms));
+  return Promise.race([promise, timer]);
+}
+
 async function loadAll() {
   showLoading();
+  // Safety net: esconde loading após 18s independente de qualquer coisa
+  const safetyTimer = setTimeout(() => { hideLoading(); }, 18000);
   try {
     await loadEquips();
     await loadLeads();
@@ -772,18 +793,33 @@ async function loadAll() {
     console.error('Erro ao carregar dados:', e);
     toast('Erro ao carregar dados. Verifique sua conexão.');
   } finally {
+    clearTimeout(safetyTimer);
     hideLoading();
   }
 }
 
 async function loadLeads() {
-  const {data} = await sb.from('leads').select('*').order('created_at',{ascending:false});
-  leads = data || [];
+  try {
+    const result = await withTimeout(
+      sb.from('leads').select('*').order('created_at',{ascending:false})
+    );
+    leads = result?.data || [];
+  } catch(e) {
+    console.warn('loadLeads timeout/erro:', e.message);
+    leads = leads || [];
+  }
 }
 
 async function loadEquips() {
-  const {data} = await sb.from('equipamentos').select('*').order('label');
-  equips = data || [];
+  try {
+    const result = await withTimeout(
+      sb.from('equipamentos').select('*').order('label')
+    );
+    equips = result?.data || [];
+  } catch(e) {
+    console.warn('loadEquips timeout/erro:', e.message);
+    equips = equips || [];
+  }
   renderEquipChips();
   renderEquipSelect();
   renderEquipList();
