@@ -636,6 +636,7 @@ const sb = supabase.createClient(SB_URL, SB_KEY);
 let leads = [], equips = [], currentView = 'kanban';
 let filterEquip = 'all';
 let editingLead = null, editingEquip = null;
+let isSavingLead = false; // guarda contra duplo-clique
 let importRows = [], importHeaders = [];
 let currentUser = null, currentProfile = null;
 let importStep = 1;
@@ -1098,6 +1099,14 @@ function closeLeadModal() {
 }
 
 async function saveLead() {
+  // Bloqueia duplo-clique / segunda chamada simultânea
+  if (isSavingLead) return;
+  isSavingLead = true;
+
+  const btn = document.querySelector('#modal-lead .btn-primary');
+  if (btn) { btn.disabled = true; btn.textContent = 'Salvando…'; }
+
+  // Captura TODOS os dados ANTES de fechar o modal
   const name    = document.getElementById('f-name').value.trim();
   const phone   = document.getElementById('f-phone').value.trim();
   const email   = document.getElementById('f-email').value.trim();
@@ -1105,33 +1114,43 @@ async function saveLead() {
   const equip   = document.getElementById('f-equip').value;
   const status  = document.getElementById('f-status').value;
   const note    = document.getElementById('f-note').value.trim();
-  // Lê o ID direto do campo oculto — nunca perde referência
   const idExistente = document.getElementById('f-lead-id').value.trim();
   const isNew   = !idExistente;
 
-  if (!name) { toast('Nome obrigatório.'); return; }
-
-  closeLeadModal();
+  if (!name) {
+    toast('Nome obrigatório.');
+    if (btn) { btn.disabled = false; btn.textContent = 'Salvar'; }
+    isSavingLead = false;
+    return;
+  }
 
   const id  = isNew
     ? (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2))
     : idExistente;
   const now = new Date().toISOString();
 
-  // upsert: atualiza se o ID já existe, cria se não existe — impossível duplicar
-  const {error} = await sb.from('leads').upsert(
-    { id, name, phone, email, company, equip, status, note, updated_at: now,
-      ...(isNew ? { created_at: now } : {}) },
-    { onConflict: 'id' }
-  );
+  try {
+    const {error} = await sb.from('leads').upsert(
+      { id, name, phone, email, company, equip, status, note, updated_at: now,
+        ...(isNew ? { created_at: now } : {}) },
+      { onConflict: 'id' }
+    );
 
-  if (error) { toast('Erro ao salvar: ' + error.message); return; }
-  await logActivity(
-    isNew ? 'Criou Lead' : 'Editou Lead', 'Lead', id, name,
-    isNew ? `equip: ${equip}, status: ${status}` : `status: ${status}`
-  );
-  toast(isNew ? 'Lead criado!' : 'Lead atualizado!');
-  await loadLeads(); renderAll();
+    if (error) { toast('Erro ao salvar: ' + error.message); return; }
+
+    // Fecha o modal APENAS após salvar com sucesso
+    closeLeadModal();
+
+    await logActivity(
+      isNew ? 'Criou Lead' : 'Editou Lead', 'Lead', id, name,
+      isNew ? `equip: ${equip}, status: ${status}` : `status: ${status}`
+    );
+    toast(isNew ? 'Lead criado!' : 'Lead atualizado!');
+    await loadLeads(); renderAll();
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Salvar'; }
+    isSavingLead = false;
+  }
 }
 
 function editLead(id) {
