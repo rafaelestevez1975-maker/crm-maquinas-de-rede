@@ -148,11 +148,17 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); co
 .kanban-col-title { font-size:13px; font-weight:800; flex:1; }
 .kanban-col-count { font-size:11px; font-weight:700; background:rgba(0,0,0,.07); border-radius:99px; padding:2px 8px; }
 .kanban-cards { padding:10px 10px 12px; display:flex; flex-direction:column; gap:9px; min-height:60px; }
-.k-card { background:var(--card); border-radius:10px; padding:12px 14px; box-shadow:0 1px 4px rgba(0,0,0,.07); cursor:pointer; transition:box-shadow .15s, transform .15s; border-left:3px solid transparent; }
+.k-card { background:var(--card); border-radius:10px; padding:12px 14px; box-shadow:0 1px 4px rgba(0,0,0,.07); cursor:grab; transition:box-shadow .15s, transform .15s; border-left:3px solid transparent; }
 .k-card:hover { box-shadow:0 4px 14px rgba(0,0,0,.12); transform:translateY(-1px); }
+.k-card.dragging { opacity:.4; cursor:grabbing; }
 .k-card-name  { font-size:13px; font-weight:700; margin-bottom:4px; }
-.k-card-phone { font-size:11px; color:var(--text-3); margin-bottom:6px; }
+.k-card-phone { font-size:11px; color:var(--text-3); margin-bottom:4px; }
+.k-card-tags  { display:flex; align-items:center; gap:5px; flex-wrap:wrap; margin-bottom:6px; }
 .k-card-foot  { display:flex; align-items:center; justify-content:space-between; }
+.k-tag        { font-size:10px; font-weight:700; padding:2px 7px; border-radius:99px; }
+.k-temp       { font-size:11px; }
+.kanban-col.drag-over .kanban-cards { background:rgba(59,130,246,.08); border-radius:10px; outline:2px dashed var(--primary-light); }
+.kanban-col-total { font-size:10px; color:var(--text-3); margin-top:2px; }
 .k-equip-dot  { width:8px; height:8px; border-radius:50%; display:inline-block; }
 .k-equip-label{ font-size:10px; color:var(--text-3); font-weight:600; }
 
@@ -222,6 +228,15 @@ tr:hover td { background:#fafbff; }
 .badge { font-size:10px; font-weight:700; padding:3px 9px; border-radius:6px; display:inline-flex; align-items:center; gap:4px; }
 
 /* STATUS colors */
+.s-novo_lead { background:#dbeafe; color:#1d4ed8; }
+.s-msg1      { background:#fef3c7; color:#b45309; }
+.s-msg2      { background:#ffedd5; color:#9a3412; }
+.s-msg3      { background:#fed7aa; color:#c2410c; }
+.s-respondeu { background:#ede9fe; color:#6d28d9; }
+.s-quente    { background:#fee2e2; color:#991b1b; }
+.s-reuniao   { background:#d1fae5; color:#065f46; }
+.s-cof       { background:#ccfbf1; color:#0f766e; }
+/* legacy aliases */
 .s-novo      { background:#dbeafe; color:#1d4ed8; }
 .s-contato   { background:#fef3c7; color:#b45309; }
 .s-proposta  { background:#ede9fe; color:#6d28d9; }
@@ -697,14 +712,41 @@ tr:hover td { background:#fafbff; }
       </div>
       <div class="form-group"><label>Status *</label>
         <select id="f-status">
-          <option value="novo">Novo</option>
-          <option value="contato">Contato Feito</option>
-          <option value="nao_ret">Não Retornou</option>
-          <option value="proposta">Proposta Enviada</option>
-          <option value="negociando">Negociando</option>
+          <option value="novo_lead">Novo Lead</option>
+          <option value="msg1">1ª Mensagem Enviada</option>
+          <option value="msg2">2ª Mensagem Enviada</option>
+          <option value="msg3">3ª Mensagem Enviada</option>
+          <option value="respondeu">Lead Respondeu</option>
+          <option value="quente">Lead Quente</option>
+          <option value="reuniao">Reunião Agendada</option>
+          <option value="cof">COF Enviada</option>
           <option value="fechado">Fechado ✅</option>
           <option value="perdido">Perdido ❌</option>
-          <option value="sem_int">Sem Interesse</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Temperatura</label>
+        <select id="f-temperature">
+          <option value="">— Sem temperatura —</option>
+          <option value="gelado">🥶 Gelado</option>
+          <option value="frio">❄️ Frio</option>
+          <option value="morno">🌤 Morno</option>
+          <option value="quente">🔥 Quente</option>
+          <option value="ardente">🌋 Ardente</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Origem</label>
+        <select id="f-source">
+          <option value="">— Sem origem —</option>
+          <option value="Facebook">Facebook</option>
+          <option value="Google">Google</option>
+          <option value="Instagram">Instagram</option>
+          <option value="Landing Page">Landing Page</option>
+          <option value="Site">Site</option>
+          <option value="Indicação">Indicação</option>
+          <option value="ABF">ABF</option>
+          <option value="WhatsApp">WhatsApp</option>
         </select>
       </div>
     </div>
@@ -804,16 +846,36 @@ let currentUser = null, currentProfile = null;
 let importStep = 1;
 
 const STATUS_META = {
-  novo:       { label:'Novo',              cls:'s-novo',      color:'#3b82f6' },
-  contato:    { label:'Contato Feito',     cls:'s-contato',   color:'#f59e0b' },
-  nao_ret:    { label:'Não Retornou',      cls:'s-nao_ret',   color:'#fb923c' },
-  proposta:   { label:'Proposta Enviada',  cls:'s-proposta',  color:'#8b5cf6' },
-  negociando: { label:'Negociando',        cls:'s-negociando',color:'#10b981' },
-  fechado:    { label:'Fechado ✅',         cls:'s-fechado',   color:'#22c55e' },
-  perdido:    { label:'Perdido ❌',          cls:'s-perdido',   color:'#ef4444' },
-  sem_int:    { label:'Sem Interesse',     cls:'s-sem_int',   color:'#94a3b8' },
+  // ── Pipeline principal (Sults 1.0 Pipeline) ──
+  novo_lead:  { label:'Novo Lead',          cls:'s-novo_lead', color:'#3b82f6' },
+  msg1:       { label:'1ª Msg Enviada',     cls:'s-msg1',      color:'#f59e0b' },
+  msg2:       { label:'2ª Msg Enviada',     cls:'s-msg2',      color:'#fb923c' },
+  msg3:       { label:'3ª Msg Enviada',     cls:'s-msg3',      color:'#f97316' },
+  respondeu:  { label:'Lead Respondeu',     cls:'s-respondeu', color:'#8b5cf6' },
+  quente:     { label:'Lead Quente',        cls:'s-quente',    color:'#ef4444' },
+  reuniao:    { label:'Reunião Agendada',   cls:'s-reuniao',   color:'#10b981' },
+  cof:        { label:'COF Enviada',        cls:'s-cof',       color:'#0d9488' },
+  fechado:    { label:'Fechado ✅',          cls:'s-fechado',   color:'#22c55e' },
+  perdido:    { label:'Perdido ❌',           cls:'s-perdido',   color:'#94a3b8' },
+  // ── Aliases legados (compatibilidade com dados antigos) ──
+  novo:       { label:'Novo Lead',          cls:'s-novo_lead', color:'#3b82f6' },
+  contato:    { label:'1ª Msg Enviada',     cls:'s-msg1',      color:'#f59e0b' },
+  nao_ret:    { label:'2ª Msg Enviada',     cls:'s-msg2',      color:'#fb923c' },
+  proposta:   { label:'COF Enviada',        cls:'s-cof',       color:'#0d9488' },
+  negociando: { label:'Reunião Agendada',   cls:'s-reuniao',   color:'#10b981' },
+  sem_int:    { label:'Perdido ❌',           cls:'s-perdido',   color:'#94a3b8' },
 };
-const STATUS_ORDER = ['novo','contato','nao_ret','proposta','negociando','fechado','perdido','sem_int'];
+// Mapeamento legado → novo (para migração suave)
+const STATUS_LEGACY_MAP = { novo:'novo_lead', contato:'msg1', nao_ret:'msg2', proposta:'cof', negociando:'reuniao', sem_int:'perdido' };
+const STATUS_ORDER = ['novo_lead','msg1','msg2','msg3','respondeu','quente','reuniao','cof','fechado','perdido'];
+
+const TEMP_META = {
+  gelado:   { label:'🥶 Gelado',  color:'#bfdbfe' },
+  frio:     { label:'❄️ Frio',    color:'#93c5fd' },
+  morno:    { label:'🌤 Morno',   color:'#fcd34d' },
+  quente:   { label:'🔥 Quente',  color:'#fb923c' },
+  ardente:  { label:'🌋 Ardente', color:'#ef4444' },
+};
 
 const SWATCHES = ['#1b5e20','#0d47a1','#0891b2','#7c3aed','#b45309','#dc2626','#0f766e','#1d4ed8','#be123c','#854d0e','#166534','#1e40af'];
 
@@ -1169,34 +1231,91 @@ function rowHTML(l) {
 }
 
 // ─── KANBAN ──────────────────────────────────────────────────
+let _dragLeadId = null;
+
 function renderKanban() {
   const search = document.getElementById('search-input').value.toLowerCase();
-  const filtered = leads.filter(l=>(filterEquip==='all'||l.equip===filterEquip)&&
-    ((l.name||'').toLowerCase().includes(search)||(l.phone||'').includes(search)));
+  const filtered = leads.filter(l=>{
+    const normStatus = STATUS_LEGACY_MAP[l.status] || l.status;
+    const matchEquip = filterEquip==='all' || l.equip===filterEquip;
+    const matchSearch = (l.name||'').toLowerCase().includes(search)||(l.phone||'').includes(search);
+    return matchEquip && matchSearch;
+  });
   const wrap = document.getElementById('kanban-wrap');
   wrap.innerHTML = STATUS_ORDER.map(s=>{
     const meta = STATUS_META[s];
-    const cards = filtered.filter(l=>l.status===s);
-    return `<div class="kanban-col">
+    // inclui leads com status legado mapeado para esta coluna
+    const cards = filtered.filter(l=>(STATUS_LEGACY_MAP[l.status]||l.status)===s);
+    const daysAgo = l => {
+      if (!l.updated_at) return '';
+      const d = Math.floor((Date.now()-new Date(l.updated_at))/(86400000));
+      return d===0 ? 'hoje' : d===1 ? '1 dia' : `${d} dias`;
+    };
+    return `<div class="kanban-col" id="kcol-${s}"
+        ondragover="event.preventDefault();document.getElementById('kcol-${s}').classList.add('drag-over')"
+        ondragleave="document.getElementById('kcol-${s}').classList.remove('drag-over')"
+        ondrop="kanbanDrop(event,'${s}')">
       <div class="kanban-col-hd" style="border-bottom-color:${meta.color}">
-        <div class="kanban-col-title">${meta.label}</div>
+        <div style="flex:1">
+          <div class="kanban-col-title">${meta.label}</div>
+          <div class="kanban-col-total">${cards.length} lead${cards.length!==1?'s':''}</div>
+        </div>
         <span class="kanban-col-count">${cards.length}</span>
       </div>
-      <div class="kanban-cards">
+      <div class="kanban-cards" id="kcards-${s}">
         ${cards.length ? cards.map(l=>{
-          const eq=equips.find(e=>e.id===l.equip)||{color:'#94a3b8',label:'—'};
-          return `<div class="k-card" style="border-left-color:${eq.color}" onclick="editLead('${l.id}')">
+          const eq = equips.find(e=>e.id===l.equip)||{color:'#94a3b8',label:'—'};
+          const tmp = l.temperature ? TEMP_META[l.temperature] : null;
+          const src = l.source ? `<span class="k-tag" style="background:var(--bg);color:var(--text-3);border:1px solid var(--border);">📍 ${l.source}</span>` : '';
+          const tmpTag = tmp ? `<span class="k-tag" style="background:${tmp.color}22;color:${tmp.color};border:1px solid ${tmp.color}44;">${tmp.label}</span>` : '';
+          const ago = daysAgo(l);
+          return `<div class="k-card" style="border-left-color:${meta.color}"
+              draggable="true"
+              ondragstart="kanbanDragStart(event,'${l.id}')"
+              ondragend="kanbanDragEnd(event)"
+              onclick="editLead('${l.id}')">
             <div class="k-card-name">${l.name}</div>
-            <div class="k-card-phone">${l.phone||'—'}</div>
+            <div class="k-card-phone">${l.phone||'—'}${l.company?` · ${l.company}`:''}</div>
+            ${(tmpTag||src) ? `<div class="k-card-tags">${tmpTag}${src}</div>` : ''}
             <div class="k-card-foot">
-              <span><span class="k-equip-dot" style="background:${eq.color}"></span><span class="k-equip-label"> ${eq.label}</span></span>
-              <button class="btn btn-danger btn-sm" onclick="event.stopPropagation();deleteLead('${l.id}')">🗑</button>
+              <span style="display:flex;align-items:center;gap:5px;">
+                <span class="k-equip-dot" style="background:${eq.color}"></span>
+                <span class="k-equip-label" style="font-size:11px;color:var(--text-2);">${eq.label}</span>
+              </span>
+              <span style="display:flex;align-items:center;gap:4px;">
+                ${ago ? `<span style="font-size:10px;color:var(--text-3);">${ago}</span>` : ''}
+                <button class="btn btn-danger btn-sm" style="padding:2px 6px;font-size:11px;" onclick="event.stopPropagation();deleteLead('${l.id}')">🗑</button>
+              </span>
             </div>
           </div>`;
-        }).join('') : `<div style="font-size:12px;color:var(--text-3);text-align:center;padding:10px;">Vazio</div>`}
+        }).join('') : `<div style="font-size:12px;color:var(--text-3);text-align:center;padding:16px 10px;">Sem leads</div>`}
       </div>
     </div>`;
   }).join('');
+}
+
+function kanbanDragStart(e, leadId) {
+  _dragLeadId = leadId;
+  e.dataTransfer.effectAllowed = 'move';
+  setTimeout(()=>e.target.classList.add('dragging'), 0);
+}
+function kanbanDragEnd(e) {
+  e.target.classList.remove('dragging');
+  document.querySelectorAll('.kanban-col').forEach(c=>c.classList.remove('drag-over'));
+}
+async function kanbanDrop(e, newStatus) {
+  e.preventDefault();
+  document.getElementById('kcol-'+newStatus)?.classList.remove('drag-over');
+  if (!_dragLeadId) return;
+  const lead = leads.find(l=>l.id===_dragLeadId);
+  if (!lead || (STATUS_LEGACY_MAP[lead.status]||lead.status)===newStatus) { _dragLeadId=null; return; }
+  lead.status = newStatus;
+  lead.updated_at = new Date().toISOString();
+  renderKanban();
+  const {error} = await sb.from('leads').update({status:newStatus, updated_at:lead.updated_at}).eq('id',_dragLeadId);
+  if (error) { toast('Erro ao mover: '+error.message); await loadLeads(); renderKanban(); }
+  else { await logActivity(`Lead "${lead.name}" movido para "${STATUS_META[newStatus]?.label||newStatus}"`); }
+  _dragLeadId = null;
 }
 
 // ─── LIST ────────────────────────────────────────────────────
@@ -1245,7 +1364,6 @@ function renderAll() {
 
 // ─── LEAD MODAL ──────────────────────────────────────────────
 function openLeadModal(lead=null) {
-  // Grava o ID diretamente no formulário — elimina dependência de variável global
   document.getElementById('f-lead-id').value  = lead?.id || '';
   document.getElementById('modal-lead-title').textContent = lead ? 'Editar Lead' : 'Novo Lead';
   document.getElementById('f-name').value    = lead?.name    || '';
@@ -1253,7 +1371,11 @@ function openLeadModal(lead=null) {
   document.getElementById('f-email').value   = lead?.email   || '';
   document.getElementById('f-company').value = lead?.company || '';
   document.getElementById('f-equip').value   = lead?.equip   || equips[0]?.id || '';
-  document.getElementById('f-status').value  = lead?.status  || 'novo';
+  // normaliza status legado → novo antes de preencher o select
+  const normStatus = lead?.status ? (STATUS_LEGACY_MAP[lead.status] || lead.status) : 'novo_lead';
+  document.getElementById('f-status').value  = normStatus;
+  document.getElementById('f-temperature').value = lead?.temperature || '';
+  document.getElementById('f-source').value  = lead?.source || '';
   document.getElementById('f-note').value    = lead?.note    || '';
   document.getElementById('modal-lead').classList.add('open');
   setTimeout(()=>document.getElementById('f-name').focus(), 100);
@@ -1273,13 +1395,15 @@ async function saveLead() {
   if (btn) { btn.disabled = true; btn.textContent = 'Salvando…'; }
 
   // Captura TODOS os dados ANTES de fechar o modal
-  const name    = document.getElementById('f-name').value.trim();
-  const phone   = document.getElementById('f-phone').value.trim();
-  const email   = document.getElementById('f-email').value.trim();
-  const company = document.getElementById('f-company').value.trim();
-  const equip   = document.getElementById('f-equip').value;
-  const status  = document.getElementById('f-status').value;
-  const note    = document.getElementById('f-note').value.trim();
+  const name        = document.getElementById('f-name').value.trim();
+  const phone       = document.getElementById('f-phone').value.trim();
+  const email       = document.getElementById('f-email').value.trim();
+  const company     = document.getElementById('f-company').value.trim();
+  const equip       = document.getElementById('f-equip').value;
+  const status      = document.getElementById('f-status').value;
+  const temperature = document.getElementById('f-temperature').value || null;
+  const source      = document.getElementById('f-source').value || null;
+  const note        = document.getElementById('f-note').value.trim();
   const idExistente = document.getElementById('f-lead-id').value.trim();
   const isNew   = !idExistente;
 
@@ -1297,7 +1421,7 @@ async function saveLead() {
 
   try {
     const {error} = await sb.from('leads').upsert(
-      { id, name, phone, email, company, equip, status, note, updated_at: now,
+      { id, name, phone, email, company, equip, status, temperature, source, note, updated_at: now,
         ...(isNew ? { created_at: now } : {}) },
       { onConflict: 'id' }
     );
