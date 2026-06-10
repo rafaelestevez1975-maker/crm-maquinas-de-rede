@@ -264,6 +264,60 @@ tr:hover td { background:#fafbff; }
 .controle-filters { display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap; margin-bottom:18px; }
 .controle-empty { text-align:center; padding:60px 20px; color:var(--text-3); }
 
+/* WHATSAPP */
+.wapp-wrap { display:flex; height:calc(100vh - var(--header-h)); overflow:hidden; }
+.wapp-list-panel { width:320px; flex-shrink:0; border-right:1px solid var(--border); display:flex; flex-direction:column; background:var(--card); }
+.wapp-list-head { padding:14px 16px; border-bottom:1px solid var(--border); }
+.wapp-list-head h3 { font-size:15px; font-weight:800; color:var(--text); margin-bottom:10px; }
+.wapp-tabs { display:flex; gap:4px; flex-wrap:wrap; }
+.wapp-tab { padding:4px 10px; border-radius:99px; border:1.5px solid var(--border); font-size:11px; font-weight:700; cursor:pointer; background:var(--bg); color:var(--text-2); transition:all .15s; }
+.wapp-tab.active { background:var(--primary); border-color:var(--primary); color:#fff; }
+.wapp-search { margin-top:8px; }
+.wapp-search input { width:100%; padding:7px 12px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-size:13px; outline:none; }
+.wapp-conv-list { flex:1; overflow-y:auto; }
+.wapp-conv-item { display:flex; gap:10px; align-items:flex-start; padding:11px 14px; border-bottom:1px solid var(--border); cursor:pointer; transition:background .12s; }
+.wapp-conv-item:hover { background:var(--bg); }
+.wapp-conv-item.active { background:#e0e7ff; }
+.wapp-conv-avatar { width:38px; height:38px; border-radius:50%; background:linear-gradient(135deg,var(--primary-light),var(--primary)); color:#fff; display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:800; flex-shrink:0; }
+.wapp-conv-info { flex:1; min-width:0; }
+.wapp-conv-name { font-size:13px; font-weight:700; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.wapp-conv-preview { font-size:12px; color:var(--text-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:1px; }
+.wapp-conv-meta { display:flex; flex-direction:column; align-items:flex-end; gap:4px; }
+.wapp-conv-time { font-size:10px; color:var(--text-3); white-space:nowrap; }
+.wapp-badge { background:var(--success); color:#fff; border-radius:99px; font-size:9px; font-weight:800; padding:2px 6px; }
+.wapp-status-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; margin-top:3px; }
+.wapp-status-dot.bot { background:#6366f1; }
+.wapp-status-dot.aguardando { background:var(--warning); }
+.wapp-status-dot.atendido { background:var(--success); }
+.wapp-status-dot.fechado { background:var(--text-3); }
+
+.wapp-chat-panel { flex:1; display:flex; flex-direction:column; background:var(--bg); min-width:0; }
+.wapp-chat-empty { flex:1; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:12px; color:var(--text-3); }
+.wapp-chat-header { padding:12px 18px; background:var(--card); border-bottom:1px solid var(--border); display:flex; align-items:center; gap:12px; }
+.wapp-chat-header-info { flex:1; }
+.wapp-chat-header-name { font-size:14px; font-weight:800; color:var(--text); }
+.wapp-chat-header-status { font-size:11px; color:var(--text-3); margin-top:1px; }
+.wapp-chat-actions { display:flex; gap:6px; }
+.wapp-messages { flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:8px; }
+.wapp-msg { max-width:72%; padding:8px 12px; border-radius:12px; font-size:13px; line-height:1.5; word-break:break-word; white-space:pre-wrap; }
+.wapp-msg.in { background:var(--card); align-self:flex-start; border-bottom-left-radius:3px; box-shadow:var(--shadow); }
+.wapp-msg.out { background:var(--primary); color:#fff; align-self:flex-end; border-bottom-right-radius:3px; }
+.wapp-msg.out.bot { background:#6366f1; }
+.wapp-msg-time { font-size:10px; color:var(--text-3); margin-top:2px; text-align:right; }
+.wapp-msg.out .wapp-msg-time { color:rgba(255,255,255,.6); }
+.wapp-msg-sender { font-size:10px; font-weight:700; color:var(--primary-light); margin-bottom:2px; }
+.wapp-input-bar { padding:12px 16px; background:var(--card); border-top:1px solid var(--border); display:flex; gap:8px; align-items:flex-end; }
+.wapp-input-bar textarea { flex:1; resize:none; border:1.5px solid var(--border); border-radius:var(--radius-sm); padding:8px 12px; font-size:13px; font-family:inherit; outline:none; max-height:120px; overflow-y:auto; line-height:1.4; }
+.wapp-input-bar textarea:focus { border-color:var(--primary-light); }
+
+.wapp-empty-state { flex:1; display:flex; align-items:center; justify-content:center; }
+.wapp-cfg { padding:20px; }
+.wapp-cfg-title { font-size:14px; font-weight:800; color:var(--text); margin-bottom:12px; }
+.wapp-cfg-row { margin-bottom:12px; }
+.wapp-cfg-row label { display:block; font-size:11px; font-weight:700; color:var(--text-2); margin-bottom:4px; text-transform:uppercase; letter-spacing:.4px; }
+.wapp-cfg-row input { width:100%; padding:8px 12px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-size:13px; outline:none; }
+.wapp-webhook-url { background:var(--bg); border:1.5px solid var(--border); border-radius:var(--radius-sm); padding:10px 12px; font-size:12px; color:var(--text-2); word-break:break-all; margin-top:8px; }
+
 /* TOAST */
 #toast { position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(60px); background:#1e2d6b; color:#fff; padding:11px 22px; border-radius:10px; font-size:13px; font-weight:700; z-index:9000; transition:.3s; opacity:0; white-space:nowrap; }
 #toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
@@ -355,6 +409,12 @@ tr:hover td { background:#fafbff; }
     </div>
     <div class="nav-item admin-only hidden" data-page="usuarios" onclick="navTo('usuarios',this)">
       <span class="nav-icon">👥</span> Usuários
+    </div>
+
+    <div class="sidebar-section">WhatsApp CRM</div>
+    <div class="nav-item" data-page="whatsapp" onclick="navTo('whatsapp',this)" id="nav-whatsapp">
+      <span class="nav-icon">💬</span> WhatsApp
+      <span class="nav-badge" id="wapp-unread-badge" style="display:none">0</span>
     </div>
 
     <div class="sidebar-section admin-only hidden">Relatórios</div>
@@ -542,6 +602,42 @@ tr:hover td { background:#fafbff; }
         <thead><tr><th>Data/Hora</th><th>Usuário</th><th>E-mail</th></tr></thead>
         <tbody id="logins-tbody"></tbody>
       </table>
+    </div>
+  </div>
+</div>
+
+<!-- ── WHATSAPP CRM ── -->
+<div class="page" id="page-whatsapp" style="padding:0;overflow:hidden;">
+  <div class="wapp-wrap">
+    <!-- Lista de conversas -->
+    <div class="wapp-list-panel">
+      <div class="wapp-list-head">
+        <h3>💬 Conversas</h3>
+        <div class="wapp-tabs">
+          <div class="wapp-tab active" onclick="wappFilter('todas',this)">Todas</div>
+          <div class="wapp-tab" onclick="wappFilter('bot',this)">🤖 Bot</div>
+          <div class="wapp-tab" onclick="wappFilter('aguardando',this)">⏳ Aguardando</div>
+          <div class="wapp-tab" onclick="wappFilter('atendido',this)">✅ Atendido</div>
+        </div>
+        <div class="wapp-search" style="margin-top:8px;">
+          <input id="wapp-search-input" placeholder="🔍 Buscar conversa..." oninput="wappRenderList()" style="width:100%;padding:7px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13px;outline:none;">
+        </div>
+      </div>
+      <div class="wapp-conv-list" id="wapp-conv-list">
+        <div style="padding:40px 20px;text-align:center;color:var(--text-3);font-size:13px;">Carregando...</div>
+      </div>
+    </div>
+
+    <!-- Painel de chat -->
+    <div class="wapp-chat-panel" id="wapp-chat-panel">
+      <div class="wapp-chat-empty">
+        <div style="font-size:52px;">💬</div>
+        <div style="font-size:15px;font-weight:700;color:var(--text-2);">Selecione uma conversa</div>
+        <div style="font-size:13px;color:var(--text-3);">ou aguarde novas mensagens chegarem</div>
+        <div style="margin-top:16px;">
+          <button class="btn btn-ghost btn-sm" onclick="wappShowConfig()">⚙️ Configurar Z-API</button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -918,6 +1014,7 @@ const PAGE_META = {
   'rel-atividade':{ title:'Atividade',      sub:'Log de ações no sistema' },
   'rel-logins':  { title:'Logins',          sub:'Histórico de acessos' },
   'controle':    { title:'Controle de Acesso', sub:'Histórico por usuário' },
+  'whatsapp':    { title:'WhatsApp CRM', sub:'Conversas e atendimento automático' },
 };
 const TOPBAR_PAGES = new Set(['list']);
 
@@ -945,6 +1042,7 @@ function navTo(page, el) {
   if (page==='rel-atividade') loadActivityReport();
   if (page==='rel-logins') loadLoginsReport();
   if (page==='controle') loadControleAcesso();
+  if (page==='whatsapp') initWhatsapp();
 }
 
 // ─── RENDER CHIPS ────────────────────────────────────────────
@@ -1425,6 +1523,252 @@ function exportLoginsCSV() {
   const hdr = ['Data/Hora','Usuário','E-mail'];
   const rows = loginsData.map(r=>[fmtDate(r.created_at),r.user_name||'',r.user_email||'']);
   downloadCSV('logins.csv', [hdr,...rows]);
+}
+
+// ─── WHATSAPP CRM ─────────────────────────────────────────────
+const WAPP_SUPABASE_URL = 'https://riutcbwillvqjrpaefkb.supabase.co';
+const WAPP_WEBHOOK_URL  = `${WAPP_SUPABASE_URL}/functions/v1/whatsapp-webhook`;
+
+let wappConvs      = [];
+let wappActiveConv = null;
+let wappFilter_    = 'todas';
+let wappChannel    = null;
+
+// ── Init ──────────────────────────────────────────────────────
+async function initWhatsapp() {
+  await wappLoadConvs();
+  wappSubscribeRealtime();
+  wappUpdateBadge();
+}
+
+async function wappLoadConvs() {
+  const { data } = await sb.from('wapp_conversations')
+    .select('*').order('last_msg_at', { ascending: false }).limit(200);
+  wappConvs = data || [];
+  wappRenderList();
+  wappUpdateBadge();
+}
+
+function wappUpdateBadge() {
+  const total = wappConvs.reduce((s, c) => s + (c.unread || 0), 0);
+  const badge = document.getElementById('wapp-unread-badge');
+  if (badge) { badge.textContent = total; badge.style.display = total > 0 ? '' : 'none'; }
+}
+
+function wappFilter(f, el) {
+  wappFilter_ = f;
+  document.querySelectorAll('.wapp-tab').forEach(t => t.classList.remove('active'));
+  if (el) el.classList.add('active');
+  wappRenderList();
+}
+
+function wappRenderList() {
+  const q = (document.getElementById('wapp-search-input')?.value || '').toLowerCase();
+  let list = wappConvs;
+  if (wappFilter_ !== 'todas') list = list.filter(c => c.status === wappFilter_);
+  if (q) list = list.filter(c => (c.name||'').toLowerCase().includes(q) || (c.phone||'').includes(q));
+
+  const STATUS_LABEL = { bot:'🤖 Bot', aguardando:'⏳ Aguardando', atendido:'✅ Atendido', fechado:'🔒 Fechado' };
+  const container = document.getElementById('wapp-conv-list');
+  if (!list.length) {
+    container.innerHTML = '<div style="padding:40px 20px;text-align:center;color:var(--text-3);font-size:13px;">Nenhuma conversa encontrada</div>';
+    return;
+  }
+  container.innerHTML = list.map(c => `
+    <div class="wapp-conv-item${wappActiveConv?.id===c.id?' active':''}" onclick="wappOpenConv('${c.id}')">
+      <div class="wapp-conv-avatar">${(c.name||c.phone||'?').charAt(0).toUpperCase()}</div>
+      <div class="wapp-conv-info">
+        <div class="wapp-conv-name">${c.name || c.phone}</div>
+        <div class="wapp-conv-preview">${c.last_msg || '…'}</div>
+      </div>
+      <div class="wapp-conv-meta">
+        <div class="wapp-conv-time">${c.last_msg_at ? fmtDate(c.last_msg_at) : ''}</div>
+        <div class="wapp-status-dot ${c.status||'bot'}" title="${STATUS_LABEL[c.status]||c.status}"></div>
+        ${(c.unread||0)>0?`<div class="wapp-badge">${c.unread}</div>`:''}
+      </div>
+    </div>`).join('');
+}
+
+// ── Abrir conversa ────────────────────────────────────────────
+async function wappOpenConv(id) {
+  wappActiveConv = wappConvs.find(c => c.id === id) || null;
+  if (!wappActiveConv) return;
+
+  // Zera unread
+  await sb.from('wapp_conversations').update({ unread: 0 }).eq('id', id);
+  wappActiveConv.unread = 0;
+  wappRenderList();
+
+  // Carrega mensagens
+  const { data: msgs } = await sb.from('wapp_messages')
+    .select('*').eq('conv_id', id).order('created_at', { ascending: true }).limit(200);
+
+  wappRenderChat(wappActiveConv, msgs || []);
+}
+
+function wappRenderChat(conv, msgs) {
+  const STATUS_LABEL = { bot:'🤖 Atendimento automático', aguardando:'⏳ Aguardando humano', atendido:'✅ Em atendimento', fechado:'🔒 Fechado' };
+  const panel = document.getElementById('wapp-chat-panel');
+
+  const msgsHtml = msgs.map(m => {
+    const isOut = m.direction === 'out';
+    const isBot = isOut && m.sent_by === 'bot';
+    return `<div class="wapp-msg ${isOut?'out':'in'}${isBot?' bot':''}">
+      ${!isOut ? `<div class="wapp-msg-sender">${conv.name||conv.phone}</div>` : ''}
+      ${m.body}
+      <div class="wapp-msg-time">${fmtDate(m.created_at)}${isOut?' · '+(isBot?'🤖 Bot':m.sent_by||'Humano'):''}</div>
+    </div>`;
+  }).join('');
+
+  const canTakeOver = conv.status === 'bot' || conv.status === 'aguardando';
+  const isActive    = conv.status === 'atendido';
+
+  panel.innerHTML = `
+    <div class="wapp-chat-header">
+      <div class="wapp-conv-avatar" style="width:36px;height:36px;font-size:14px;">${(conv.name||conv.phone).charAt(0).toUpperCase()}</div>
+      <div class="wapp-chat-header-info">
+        <div class="wapp-chat-header-name">${conv.name||conv.phone}</div>
+        <div class="wapp-chat-header-status">${conv.phone} · ${STATUS_LABEL[conv.status]||conv.status}</div>
+      </div>
+      <div class="wapp-chat-actions">
+        ${canTakeOver ? `<button class="btn btn-primary btn-sm" onclick="wappTakeOver('${conv.id}')">👤 Assumir</button>` : ''}
+        <button class="btn btn-ghost btn-sm" onclick="wappConvertLead('${conv.id}')">➕ Lead</button>
+        ${conv.status !== 'fechado' ? `<button class="btn btn-ghost btn-sm" onclick="wappClose('${conv.id}')">🔒 Fechar</button>` : ''}
+      </div>
+    </div>
+    <div class="wapp-messages" id="wapp-msgs-${conv.id}">${msgsHtml}</div>
+    ${isActive ? `
+    <div class="wapp-input-bar">
+      <textarea id="wapp-input" placeholder="Digite sua mensagem..." rows="1"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();wappSend('${conv.id}','${conv.phone}');}"></textarea>
+      <button class="btn btn-primary" onclick="wappSend('${conv.id}','${conv.phone}')">Enviar ↗</button>
+    </div>` : `<div style="padding:10px 16px;background:var(--card);border-top:1px solid var(--border);font-size:12px;color:var(--text-3);text-align:center;">
+      ${canTakeOver ? 'Clique em <strong>Assumir</strong> para iniciar o atendimento humano.' : 'Conversa fechada.'}
+    </div>`}`;
+
+  // Scroll to bottom
+  setTimeout(() => {
+    const el = document.getElementById(`wapp-msgs-${conv.id}`);
+    if (el) el.scrollTop = el.scrollHeight;
+  }, 50);
+}
+
+// ── Ações ─────────────────────────────────────────────────────
+async function wappTakeOver(id) {
+  await sb.from('wapp_conversations').update({ status: 'atendido' }).eq('id', id);
+  const idx = wappConvs.findIndex(c => c.id === id);
+  if (idx >= 0) wappConvs[idx].status = 'atendido';
+  wappActiveConv = wappConvs[idx];
+  await wappOpenConv(id);
+  toast('Atendimento assumido! Agora você controla a conversa.');
+}
+
+async function wappClose(id) {
+  if (!confirm('Fechar esta conversa?')) return;
+  await sb.from('wapp_conversations').update({ status: 'fechado' }).eq('id', id);
+  const idx = wappConvs.findIndex(c => c.id === id);
+  if (idx >= 0) wappConvs[idx].status = 'fechado';
+  wappRenderList();
+  await wappOpenConv(id);
+}
+
+async function wappConvertLead(id) {
+  const conv = wappConvs.find(c => c.id === id);
+  if (!conv) return;
+  openLeadModal({ name: conv.name||conv.phone, phone: conv.phone });
+  toast('Preencha os dados do lead e salve.');
+}
+
+async function wappSend(convId, phone) {
+  const input = document.getElementById('wapp-input');
+  const body  = input?.value.trim();
+  if (!body) return;
+  input.value = '';
+
+  // Salva mensagem no banco
+  await sb.from('wapp_messages').insert({
+    conv_id: convId, direction: 'out', body,
+    sent_by: currentUser?.email || 'humano',
+  });
+  await sb.from('wapp_conversations').update({
+    last_msg: body.substring(0, 120), last_msg_at: new Date().toISOString(),
+  }).eq('id', convId);
+
+  // Envia via Z-API (se configurado)
+  const cfg = wappGetConfig();
+  if (cfg.instance && cfg.token) {
+    fetch(`https://api.z-api.io/instances/${cfg.instance}/token/${cfg.token}/send-text`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Client-Token': cfg.clientToken||'' },
+      body: JSON.stringify({ phone, message: body }),
+    }).catch(() => {});
+  }
+
+  await wappOpenConv(convId);
+}
+
+// ── Config Z-API ──────────────────────────────────────────────
+function wappGetConfig() {
+  return {
+    instance:    localStorage.getItem('wapp_instance') || '',
+    token:       localStorage.getItem('wapp_token') || '',
+    clientToken: localStorage.getItem('wapp_client_token') || '',
+  };
+}
+
+function wappShowConfig() {
+  const cfg = wappGetConfig();
+  const panel = document.getElementById('wapp-chat-panel');
+  panel.innerHTML = `
+    <div style="padding:28px;max-width:520px;margin:0 auto;">
+      <div style="font-size:16px;font-weight:800;color:var(--text);margin-bottom:6px;">⚙️ Configuração Z-API</div>
+      <div style="font-size:13px;color:var(--text-3);margin-bottom:20px;">
+        Crie sua conta em <strong>zapi.io</strong>, crie uma instância, conecte seu WhatsApp e preencha os dados abaixo.
+      </div>
+      <div class="wapp-cfg-row">
+        <label>Instance ID</label>
+        <input id="cfg-instance" value="${cfg.instance}" placeholder="Ex: 3B2E1...">
+      </div>
+      <div class="wapp-cfg-row">
+        <label>Token</label>
+        <input id="cfg-token" type="password" value="${cfg.token}" placeholder="Token da instância">
+      </div>
+      <div class="wapp-cfg-row">
+        <label>Client Token (Security Token)</label>
+        <input id="cfg-client-token" type="password" value="${cfg.clientToken}" placeholder="Token de segurança da conta">
+      </div>
+      <button class="btn btn-primary" style="width:100%;margin-top:8px;" onclick="wappSaveConfig()">💾 Salvar Configuração</button>
+      <div style="margin-top:20px;border-top:1px solid var(--border);padding-top:16px;">
+        <div style="font-size:12px;font-weight:700;color:var(--text-2);margin-bottom:6px;">URL do Webhook (cole no painel Z-API):</div>
+        <div class="wapp-webhook-url">${WAPP_WEBHOOK_URL}</div>
+        <button class="btn btn-ghost btn-sm" style="margin-top:8px;" onclick="navigator.clipboard.writeText('${WAPP_WEBHOOK_URL}');toast('URL copiada!')">📋 Copiar URL</button>
+      </div>
+    </div>`;
+}
+
+function wappSaveConfig() {
+  localStorage.setItem('wapp_instance', document.getElementById('cfg-instance').value.trim());
+  localStorage.setItem('wapp_token', document.getElementById('cfg-token').value.trim());
+  localStorage.setItem('wapp_client_token', document.getElementById('cfg-client-token').value.trim());
+  toast('Configuração salva!');
+  const panel = document.getElementById('wapp-chat-panel');
+  panel.innerHTML = '<div class="wapp-chat-empty"><div style="font-size:52px;">✅</div><div style="font-size:14px;font-weight:700;color:var(--text-2);">Configuração salva!</div><div style="font-size:13px;color:var(--text-3);">Selecione uma conversa ao lado.</div></div>';
+}
+
+// ── Realtime ──────────────────────────────────────────────────
+function wappSubscribeRealtime() {
+  if (wappChannel) sb.removeChannel(wappChannel);
+  wappChannel = sb.channel('wapp-realtime')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'wapp_conversations' }, async () => {
+      await wappLoadConvs();
+    })
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'wapp_messages' }, async (payload) => {
+      if (wappActiveConv && payload.new.conv_id === wappActiveConv.id) {
+        await wappOpenConv(wappActiveConv.id);
+      }
+      await wappLoadConvs();
+    })
+    .subscribe();
 }
 
 // ─── CONTROLE DE ACESSO ──────────────────────────────────────

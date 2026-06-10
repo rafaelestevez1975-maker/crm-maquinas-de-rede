@@ -398,9 +398,12 @@ async function fetchProfileRole(userId) {
   return new Promise(async (resolve) => {
     const timer = setTimeout(() => resolve('reader'), 5000);
     try {
-      const { data } = await supa.from('profiles').select('role').eq('id', userId).maybeSingle();
+      const { data } = await supa.from('profiles').select('role, pt_role').eq('id', userId).maybeSingle();
       clearTimeout(timer);
-      resolve(data?.role || 'reader');
+      // Normalize: the DB uses user_role enum ('admin','ADMIN','user','VIEWER') + pt_role text
+      // LaserCo roles: 'admin' or 'reader'
+      const r = ((data?.pt_role || data?.role || '')).toString().toLowerCase();
+      resolve(r === 'admin' ? 'admin' : 'reader');
     } catch(e) { clearTimeout(timer); resolve('reader'); }
   });
 }
@@ -470,11 +473,14 @@ async function doRegister() {
     // Mark invite as used
     await supa.from('invites').update({ used_at: new Date().toISOString() }).eq('token', inviteToken);
   }
-  const { error } = await supa.auth.signUp({ email, password: pass, options: { data: { name, role: inviteRole } } });
+  const { error } = await supa.auth.signUp({ email, password: pass, options: { data: { name, role: inviteRole, pt_role: inviteRole } } });
   if (error) { errEl.textContent=error.message; errEl.classList.add('show'); return; }
   document.getElementById('register-info').textContent='Conta criada! Entrando...';
-  const { data: loginData } = await supa.auth.signInWithPassword({ email, password: pass });
+  const { data: loginData, error: loginErr } = await supa.auth.signInWithPassword({ email, password: pass });
+  if (loginErr) { errEl.textContent='Conta criada! Verifique seu e-mail para confirmar e depois faça login.'; errEl.classList.add('show'); return; }
   if (loginData?.user) {
+    // Garantir que o pt_role LaserCo está correto no perfil
+    try { await supa.from('profiles').update({ pt_role: inviteRole }).eq('id', loginData.user.id); } catch(e){}
     await enterApp(loginData.user, inviteRole);
   }
 }
@@ -1432,19 +1438,27 @@ function renderLancamento() {
 
   // Pre-compute per-unit summary for trailing columns
   function unitSummary(u) {
-    let total=0, activeDays=0;
-    const refDay = isCurrentMonth ? todayDay : daysInMonth;
-    for (let d=1; d<=daysInMonth; d++) {
-      const v = getDaySale(u.name, year, month, d);
-      total += v;
-      if (v>0 && d<=refDay) activeDays++;
-    }
+    let total=0;
+    for (let d=1; d<=daysInMonth; d++) total += getDaySale(u.name, year, month, d);
     const goal = getGoal(u.name, year, month);
-    const avg  = activeDays ? total/activeDays : 0;
-    const proj = activeDays ? avg * daysInMonth : total;
+    // Projeção: média por dia corrido × total de dias do mês
+    // Mês atual: dias corridos = todayDay. Mês passado: já encerrou, proj = total
+    const daysElapsed = isCurrentMonth ? todayDay : daysInMonth;
+    const avg  = daysElapsed > 0 ? total / daysElapsed : 0;
+    const proj = isCurrentMonth ? avg * daysInMonth : total;
     const pctReal = goal ? total/goal : null;
     const pctProj = goal ? proj/goal : null;
-    return {total, goal, proj, pctReal, pctProj};
+    return {total, goal, proj, pctReal, pctProj, avg};
+  }
+
+  // Cor da linha conforme % da projeção vs meta
+  function rowBg(pctProj) {
+    if (pctProj === null) return '';
+    const p = pctProj;
+    if (p < 0.65)  return 'background:rgba(239,68,68,0.10)';   // vermelho claro
+    if (p < 1.00)  return 'background:rgba(156,163,175,0.14)'; // cinza claro
+    if (p < 1.20)  return 'background:rgba(59,130,246,0.10)';  // azul claro
+    return                 'background:rgba(245,158,11,0.13)';  // dourado claro
   }
 
   // Totals row trailing
@@ -1463,10 +1477,10 @@ function renderLancamento() {
     </div>
     <div class="table-wrap">
       <div class="table-header"><h3>Grade Diária</h3><span style="font-size:12px;color:var(--text3)">Clique na célula para editar</span></div>
-      <div style="overflow-x:auto"><table>
+      <div style="overflow-x:auto"><table style="border-collapse:separate;border-spacing:0">
         <thead>
           <tr>
-            <th style="min-width:150px;text-align:left" rowspan="2">Unidade</th>
+            <th style="min-width:160px;text-align:left;position:sticky;left:0;z-index:3;background:var(--surface2);box-shadow:2px 0 4px rgba(0,0,0,.06)" rowspan="2">Unidade</th>
             ${Array.from({length:daysInMonth},(_,i)=>{
               const d=i+1,dow=DAYS_PT[new Date(year,month-1,d).getDay()],isT=d===todayDay;
               return`<th style="${isT?'color:var(--accent)':''}"><div>${d}</div><div style="font-weight:400;font-size:9px">${dow}</div></th>`;
@@ -1483,8 +1497,8 @@ function renderLancamento() {
           const days=[];
           for(let d=1;d<=daysInMonth;d++) days.push(getDaySale(u.name,year,month,d));
           const s = allSumm[ui];
-          return`<tr>
-            <td style="font-weight:600">${u.name}</td>
+          return`<tr style="${rowBg(s.pctProj)}">
+            <td style="font-weight:600;position:sticky;left:0;z-index:2;background:inherit;box-shadow:2px 0 4px rgba(0,0,0,.05);white-space:nowrap">${u.name}</td>
             ${days.map((v,i)=>{const d=i+1,isT=d===todayDay;
               return`<td class="${currentRole==='admin'?'editable-cell':''}${isT?' today-col':''}"
                 onclick="if(currentRole==='admin')editCell('${u.name.replace(/'/g,"\\'")}',${year},${month},${d},this)"
@@ -1499,7 +1513,7 @@ function renderLancamento() {
         }).join('')}
         </tbody>
         <tfoot><tr class="totals-row">
-          <td>TOTAL</td>
+          <td style="position:sticky;left:0;z-index:2;background:var(--surface2);box-shadow:2px 0 4px rgba(0,0,0,.06);white-space:nowrap">TOTAL</td>
           ${Array.from({length:daysInMonth},(_,i)=>{
             const d=i+1, dt=units.reduce((s,u)=>s+getDaySale(u.name,year,month,d),0);
             return`<td>${dt>0?fmtK(dt):'—'}</td>`;
