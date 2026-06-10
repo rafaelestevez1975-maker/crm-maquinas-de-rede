@@ -124,6 +124,12 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); co
 
 /* FUNNEL */
 .funnel-visual { display:flex; flex-direction:column; gap:6px; padding:12px 18px; }
+.conv-row { display:flex; align-items:center; gap:10px; padding:5px 18px; }
+.conv-label { font-size:11px; font-weight:700; color:var(--text-2); width:140px; flex-shrink:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.conv-bar-wrap { flex:1; background:var(--bg); border-radius:99px; height:18px; overflow:hidden; }
+.conv-bar { height:100%; border-radius:99px; display:flex; align-items:center; justify-content:flex-end; padding-right:7px; font-size:10px; font-weight:700; color:#fff; min-width:24px; transition:width .4s; }
+.conv-pct { font-size:11px; font-weight:700; width:40px; text-align:right; flex-shrink:0; }
+.conv-arrow { font-size:11px; color:var(--text-3); width:32px; text-align:center; flex-shrink:0; }
 .funnel-row { display:flex; align-items:center; gap:12px; cursor:pointer; }
 .funnel-bar-wrap { flex:1; height:32px; background:#f1f5f9; border-radius:6px; overflow:hidden; }
 .funnel-bar { height:100%; border-radius:6px; display:flex; align-items:center; padding-left:10px; font-size:11px; font-weight:700; color:white; transition:width .6s cubic-bezier(.4,0,.2,1); min-width:24px; white-space:nowrap; overflow:hidden; }
@@ -366,6 +372,7 @@ tr:hover td { background:#fafbff; }
   .sidebar { transform:translateX(-100%); }
   .main-wrap { margin-left:0; }
   .dash-grid, .dash-grid-3, .form-row { grid-template-columns:1fr; }
+  #page-dashboard > div[style*="grid-template-columns:1fr 1fr 1fr"] { grid-template-columns:1fr !important; }
   .kanban-wrap { flex-direction:column; }
   .kanban-col { min-width:100%; max-width:100%; }
 }
@@ -477,24 +484,45 @@ tr:hover td { background:#fafbff; }
 
 <!-- ── DASHBOARD ── -->
 <div class="page active" id="page-dashboard">
+  <!-- KPIs -->
   <div class="kpi-row" id="kpi-row"></div>
+
+  <!-- Linha 2: Funil de Conversão + Evolução Semanal -->
   <div class="dash-grid">
     <div class="card">
-      <div class="card-header"><div><div class="card-title">Status dos Leads</div><div class="card-sub">Distribuição por status</div></div></div>
-      <div class="card-body" style="display:flex;justify-content:center;align-items:center;min-height:220px;"><canvas id="chartStatus" height="200"></canvas></div>
+      <div class="card-header"><div><div class="card-title">Funil de Conversão</div><div class="card-sub">Taxa de avanço entre etapas</div></div></div>
+      <div class="card-body" style="padding:8px 0 0;"><div id="conv-funnel"></div></div>
     </div>
     <div class="card">
-      <div class="card-header"><div><div class="card-title">Leads por Tipo</div><div class="card-sub">Distribuição por tipo de lead</div></div></div>
-      <div class="card-body" style="display:flex;justify-content:center;align-items:center;min-height:220px;"><canvas id="chartEquip" height="200"></canvas></div>
+      <div class="card-header"><div><div class="card-title">Evolução de Leads</div><div class="card-sub">Novos leads criados por semana</div></div></div>
+      <div class="card-body"><canvas id="chartLine" height="160"></canvas></div>
     </div>
   </div>
+
+  <!-- Linha 3: Origem + Temperatura + Tipo de Lead -->
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;">
+    <div class="card">
+      <div class="card-header"><div><div class="card-title">Leads por Origem</div><div class="card-sub">Canal de aquisição</div></div></div>
+      <div class="card-body" style="display:flex;justify-content:center;align-items:center;min-height:190px;"><canvas id="chartSource" height="180"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div><div class="card-title">Temperatura</div><div class="card-sub">Qualificação dos leads</div></div></div>
+      <div class="card-body" style="display:flex;justify-content:center;align-items:center;min-height:190px;"><canvas id="chartTemp" height="180"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div><div class="card-title">Leads por Tipo</div><div class="card-sub">Distribuição por produto</div></div></div>
+      <div class="card-body" style="display:flex;justify-content:center;align-items:center;min-height:190px;"><canvas id="chartEquip" height="180"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Linha 4: Bar empilhado + Recentes -->
   <div class="dash-grid-3">
     <div class="card">
-      <div class="card-header"><div><div class="card-title">Status × Tipo de Lead</div><div class="card-sub">Composição empilhada</div></div></div>
+      <div class="card-header"><div><div class="card-title">Pipeline por Produto</div><div class="card-sub">Etapas × tipo de lead</div></div></div>
       <div class="card-body"><canvas id="chartBar" height="140"></canvas></div>
     </div>
     <div class="card">
-      <div class="card-header"><div><div class="card-title">Recentes</div></div></div>
+      <div class="card-header"><div><div class="card-title">Últimos Leads</div></div></div>
       <div class="recent-list" id="recent-list"></div>
     </div>
   </div>
@@ -1133,50 +1161,162 @@ function renderEquipSelect() {
 }
 
 // ─── DASHBOARD ───────────────────────────────────────────────
-let chartStatus=null, chartEquip=null, chartBar=null;
+let chartEquip=null, chartBar=null, chartLine=null, chartSource=null, chartTemp=null;
 
 function renderDashboard() {
-  const total = leads.length;
-  const fechados = leads.filter(l=>l.status==='fechado').length;
-  const novos    = leads.filter(l=>l.status==='novo').length;
-  const negoc    = leads.filter(l=>l.status==='negociando').length;
-  const taxa = total>0 ? ((fechados/total)*100).toFixed(1) : 0;
+  const now   = new Date();
+  const ms30  = 30*24*60*60*1000;
+  const ms7   = 7*24*60*60*1000;
 
-  document.getElementById('kpi-row').innerHTML = `
-    <div class="kpi-card" style="border-left-color:#3b82f6"><span class="kpi-icon">👥</span><div class="kpi-label">Total Leads</div><div class="kpi-value" style="color:#3b82f6">${total}</div></div>
-    <div class="kpi-card" style="border-left-color:#22c55e"><span class="kpi-icon">✅</span><div class="kpi-label">Fechados</div><div class="kpi-value" style="color:#22c55e">${fechados}</div></div>
-    <div class="kpi-card" style="border-left-color:#f59e0b"><span class="kpi-icon">🔥</span><div class="kpi-label">Novos</div><div class="kpi-value" style="color:#f59e0b">${novos}</div></div>
-    <div class="kpi-card" style="border-left-color:#8b5cf6"><span class="kpi-icon">💬</span><div class="kpi-label">Negociando</div><div class="kpi-value" style="color:#8b5cf6">${negoc}</div></div>
-    <div class="kpi-card" style="border-left-color:#0891b2"><span class="kpi-icon">📈</span><div class="kpi-label">Taxa Fechamento</div><div class="kpi-value" style="color:#0891b2">${taxa}%</div></div>
-  `;
-  // recent
-  document.getElementById('recent-list').innerHTML = leads.slice(0,5).map(l=>{
+  // helpers
+  const normStatus = l => STATUS_LEGACY_MAP[l.status] || l.status;
+  const active = leads.filter(l => !['fechado','perdido'].includes(normStatus(l)));
+  const total  = leads.length;
+  const fechados  = leads.filter(l=>normStatus(l)==='fechado').length;
+  const perdidos  = leads.filter(l=>normStatus(l)==='perdido').length;
+  const reuniao   = leads.filter(l=>normStatus(l)==='reuniao').length;
+  const quentes   = leads.filter(l=>normStatus(l)==='quente').length;
+  const novos30   = leads.filter(l=>l.created_at && (now - new Date(l.created_at)) < ms30).length;
+  const novos7    = leads.filter(l=>l.created_at && (now - new Date(l.created_at)) < ms7).length;
+  const taxa = total>0 ? ((fechados/total)*100).toFixed(1) : 0;
+  const ticketMedio = fechados > 0 ? 'R$ —' : 'R$ —'; // sem campo valor ainda
+
+  // ── KPIs ─────────────────────────────────────────────────────
+  const kpi = (icon,label,value,color,sub='') => `
+    <div class="kpi-card" style="border-left-color:${color}">
+      <span class="kpi-icon">${icon}</span>
+      <div class="kpi-label">${label}</div>
+      <div class="kpi-value" style="color:${color}">${value}</div>
+      ${sub?`<div style="font-size:11px;color:var(--text-3);margin-top:2px;">${sub}</div>`:''}
+    </div>`;
+
+  document.getElementById('kpi-row').innerHTML =
+    kpi('👥','Total Leads',         total,     '#3b82f6', `${active.length} ativos`) +
+    kpi('✅','Fechados',             fechados,  '#22c55e', `${taxa}% conversão`) +
+    kpi('📅','Reunião Agendada',     reuniao,   '#10b981') +
+    kpi('🔥','Leads Quentes',        quentes,   '#ef4444') +
+    kpi('📩','Novos (30 dias)',       novos30,   '#f59e0b', `${novos7} esta semana`) +
+    kpi('❌','Perdidos',              perdidos,  '#94a3b8') +
+    kpi('📈','Taxa de Conversão',     taxa+'%',  '#0891b2', `${total} leads totais`);
+
+  // ── Funil de Conversão ──────────────────────────────────────
+  const funnelStages = [
+    {key:'novo_lead', label:'Novo Lead'},
+    {key:'msg1',      label:'1ª Msg Enviada'},
+    {key:'respondeu', label:'Respondeu'},
+    {key:'quente',    label:'Lead Quente'},
+    {key:'reuniao',   label:'Reunião Agendada'},
+    {key:'cof',       label:'COF Enviada'},
+    {key:'fechado',   label:'Fechado'},
+  ];
+  // conta leads que JÁ passaram ou estão em cada etapa (posição ≥ stage)
+  const stageIdx = s => STATUS_ORDER.indexOf(s);
+  const cntAtOrAfter = key => leads.filter(l => stageIdx(normStatus(l)) >= stageIdx(key)).length;
+  const funnelCounts = funnelStages.map(s => cntAtOrAfter(s.key));
+  const top = funnelCounts[0] || 1;
+
+  document.getElementById('conv-funnel').innerHTML = funnelStages.map((s,i) => {
+    const cnt  = funnelCounts[i];
+    const meta = STATUS_META[s.key];
+    const pct  = ((cnt/top)*100).toFixed(0);
+    const conv = i>0 && funnelCounts[i-1]>0 ? ((cnt/funnelCounts[i-1])*100).toFixed(0)+'%' : '';
+    return `<div class="conv-row">
+      <div class="conv-label">${s.label}</div>
+      <div class="conv-bar-wrap">
+        <div class="conv-bar" style="width:${pct}%;background:${meta.color}">${cnt}</div>
+      </div>
+      <div class="conv-pct" style="color:${meta.color}">${cnt}</div>
+      ${conv ? `<div class="conv-arrow" title="Conversão da etapa anterior" style="color:${parseFloat(conv)>=50?'#22c55e':parseFloat(conv)>=25?'#f59e0b':'#ef4444'}">▼${conv}</div>` : '<div class="conv-arrow"></div>'}
+    </div>`;
+  }).join('');
+
+  // ── Evolução semanal (últimas 8 semanas) ─────────────────────
+  const weeks = Array.from({length:8},(_,i)=>{
+    const d = new Date(now); d.setDate(d.getDate() - (7*(7-i)));
+    return d;
+  });
+  const weekLabels = weeks.map(d=>`${d.getDate()}/${d.getMonth()+1}`);
+  const weekCounts = weeks.map((d,i)=>{
+    const from = d.getTime();
+    const to   = i<weeks.length-1 ? weeks[i+1].getTime() : now.getTime()+1;
+    return leads.filter(l=>l.created_at&&new Date(l.created_at)>=from&&new Date(l.created_at)<to).length;
+  });
+  if (chartLine) chartLine.destroy();
+  chartLine = new Chart(document.getElementById('chartLine'),{
+    type:'line',
+    data:{labels:weekLabels,datasets:[{
+      label:'Novos leads',data:weekCounts,
+      borderColor:'#3b82f6',backgroundColor:'#3b82f620',
+      fill:true,tension:0.4,pointBackgroundColor:'#3b82f6',pointRadius:4
+    }]},
+    options:{plugins:{legend:{display:false}},responsive:true,
+      scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{ticks:{stepSize:1},grid:{color:'#f1f5f9'}}}}
+  });
+
+  // ── Leads por Origem ─────────────────────────────────────────
+  const srcMap = {};
+  leads.forEach(l=>{ const s=l.source||'Não informado'; srcMap[s]=(srcMap[s]||0)+1; });
+  const srcKeys = Object.keys(srcMap).sort((a,b)=>srcMap[b]-srcMap[a]);
+  const srcColors = ['#3b82f6','#10b981','#f59e0b','#8b5cf6','#ef4444','#0891b2','#f97316','#94a3b8'];
+  if (chartSource) chartSource.destroy();
+  chartSource = new Chart(document.getElementById('chartSource'),{
+    type:'doughnut',
+    data:{labels:srcKeys,datasets:[{data:srcKeys.map(k=>srcMap[k]),backgroundColor:srcColors,borderWidth:2,borderColor:'#fff'}]},
+    options:{plugins:{legend:{position:'bottom',labels:{font:{size:10},padding:8}}},cutout:'60%'}
+  });
+
+  // ── Temperatura ───────────────────────────────────────────────
+  const temps = ['ardente','quente','morno','frio','gelado'];
+  const tempLabels = ['🌋 Ardente','🔥 Quente','🌤 Morno','❄️ Frio','🥶 Gelado'];
+  const tempColors = ['#ef4444','#fb923c','#fcd34d','#93c5fd','#bfdbfe'];
+  const tempCounts = temps.map(t=>leads.filter(l=>l.temperature===t).length);
+  const noTemp = leads.filter(l=>!l.temperature).length;
+  if (noTemp>0) { tempLabels.push('Sem temp.'); tempColors.push('#e2e8f0'); tempCounts.push(noTemp); }
+  if (chartTemp) chartTemp.destroy();
+  chartTemp = new Chart(document.getElementById('chartTemp'),{
+    type:'doughnut',
+    data:{labels:tempLabels,datasets:[{data:tempCounts,backgroundColor:tempColors,borderWidth:2,borderColor:'#fff'}]},
+    options:{plugins:{legend:{position:'bottom',labels:{font:{size:10},padding:8}}},cutout:'60%'}
+  });
+
+  // ── Tipo de Lead (donut) ──────────────────────────────────────
+  const equipCounts = equips.map(e=>leads.filter(l=>l.equip===e.id).length);
+  if (chartEquip) chartEquip.destroy();
+  chartEquip = new Chart(document.getElementById('chartEquip'),{
+    type:'doughnut',
+    data:{labels:equips.map(e=>e.label),datasets:[{data:equipCounts,backgroundColor:equips.map(e=>e.color),borderWidth:2,borderColor:'#fff'}]},
+    options:{plugins:{legend:{position:'bottom',labels:{font:{size:10},padding:8}}},cutout:'60%'}
+  });
+
+  // ── Pipeline por Produto (bar empilhado) ─────────────────────
+  const statusLabels = STATUS_ORDER.map(s=>STATUS_META[s].label);
+  const barDatasets  = equips.map(e=>({
+    label:e.label,
+    data:STATUS_ORDER.map(s=>leads.filter(l=>l.equip===e.id&&normStatus(l)===s).length),
+    backgroundColor:e.color+'cc',borderRadius:4
+  }));
+  if (chartBar) chartBar.destroy();
+  chartBar = new Chart(document.getElementById('chartBar'),{
+    type:'bar',
+    data:{labels:statusLabels,datasets:barDatasets},
+    options:{plugins:{legend:{position:'top',labels:{font:{size:11}}}},responsive:true,
+      scales:{x:{stacked:true,ticks:{font:{size:9}}},y:{stacked:true,ticks:{stepSize:1}}}}
+  });
+
+  // ── Recentes ─────────────────────────────────────────────────
+  document.getElementById('recent-list').innerHTML = leads.slice(0,6).map(l=>{
     const eq = equips.find(e=>e.id===l.equip)||{color:'#94a3b8',label:'—'};
-    const sm = STATUS_META[l.status]||{label:l.status,cls:'s-novo'};
+    const sm = STATUS_META[normStatus(l)]||{label:l.status,cls:'s-novo_lead'};
+    const ago= l.created_at ? fmtDate(l.created_at) : '';
     return `<div class="recent-item" onclick="editLead('${l.id}')">
       <div class="avatar" style="background:${eq.color}">${(l.name||'?').charAt(0).toUpperCase()}</div>
-      <div class="recent-info"><div class="recent-name">${l.name}</div><div class="recent-phone">${l.phone||'—'}</div></div>
+      <div class="recent-info">
+        <div class="recent-name">${l.name}</div>
+        <div class="recent-phone">${l.phone||'—'}${ago?` · ${ago}`:''}</div>
+      </div>
       <span class="recent-tag badge ${sm.cls}">${sm.label}</span>
     </div>`;
   }).join('') || '<div style="padding:20px;text-align:center;color:var(--text-3);font-size:13px;">Nenhum lead ainda.</div>';
-
-  // Chart status
-  const statusCounts = STATUS_ORDER.map(s=>leads.filter(l=>l.status===s).length);
-  const statusColors = STATUS_ORDER.map(s=>STATUS_META[s].color);
-  const statusLabels = STATUS_ORDER.map(s=>STATUS_META[s].label);
-  if (chartStatus) chartStatus.destroy();
-  chartStatus = new Chart(document.getElementById('chartStatus'),{type:'doughnut',data:{labels:statusLabels,datasets:[{data:statusCounts,backgroundColor:statusColors,borderWidth:2,borderColor:'#fff'}]},options:{plugins:{legend:{position:'right',labels:{font:{size:11},padding:10}}},cutout:'65%'}});
-
-  // Chart equip
-  const equipCounts = equips.map(e=>leads.filter(l=>l.equip===e.id).length);
-  const equipColors = equips.map(e=>e.color);
-  if (chartEquip) chartEquip.destroy();
-  chartEquip = new Chart(document.getElementById('chartEquip'),{type:'doughnut',data:{labels:equips.map(e=>e.label),datasets:[{data:equipCounts,backgroundColor:equipColors,borderWidth:2,borderColor:'#fff'}]},options:{plugins:{legend:{position:'right',labels:{font:{size:11},padding:10}}},cutout:'65%'}});
-
-  // Chart bar
-  const datasets = equips.map(e=>({label:e.label,data:STATUS_ORDER.map(s=>leads.filter(l=>l.equip===e.id&&l.status===s).length),backgroundColor:e.color+'cc',borderRadius:4}));
-  if (chartBar) chartBar.destroy();
-  chartBar = new Chart(document.getElementById('chartBar'),{type:'bar',data:{labels:statusLabels,datasets},options:{plugins:{legend:{position:'top',labels:{font:{size:11}}}},responsive:true,scales:{x:{stacked:true,ticks:{font:{size:10}}},y:{stacked:true,ticks:{stepSize:1}}}}});
 }
 
 // ─── FUNNEL ──────────────────────────────────────────────────
