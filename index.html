@@ -212,8 +212,17 @@ tr:hover td { background:#fafbff; }
 
 /* USERS PAGE */
 .users-list { display:flex; flex-direction:column; gap:10px; padding:18px 22px; }
-.user-item { display:flex; align-items:center; gap:14px; padding:14px 16px; border:1.5px solid var(--border); border-radius:10px; background:var(--bg); }
-.user-avatar-sm { width:38px; height:38px; border-radius:50%; background:linear-gradient(135deg,var(--accent),#0077ff); display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:800; color:#fff; flex-shrink:0; }
+.user-item { display:flex; align-items:center; gap:14px; padding:16px 18px; border:1.5px solid var(--border); border-radius:12px; background:var(--card); transition:box-shadow .15s; }
+.user-item:hover { box-shadow:var(--shadow); }
+.user-avatar-sm { width:44px; height:44px; border-radius:50%; background:linear-gradient(135deg,var(--accent),#0077ff); display:flex; align-items:center; justify-content:center; font-size:17px; font-weight:800; color:#fff; flex-shrink:0; }
+.user-avatar-admin { background:linear-gradient(135deg,#7c3aed,#a855f7); }
+.user-info { flex:1; min-width:0; }
+.user-name-row { display:flex; align-items:center; gap:8px; margin-bottom:3px; flex-wrap:wrap; }
+.user-actions { display:flex; gap:6px; align-items:center; margin-left:auto; flex-shrink:0; }
+.user-stats-bar { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:20px; }
+.user-stat { background:var(--card); border:1.5px solid var(--border); border-radius:10px; padding:14px 16px; text-align:center; }
+.user-stat-val { font-size:22px; font-weight:900; color:var(--primary); }
+.user-stat-lbl { font-size:11px; color:var(--text-3); margin-top:2px; }
 .user-info { flex:1; min-width:0; }
 .user-name { font-size:14px; font-weight:700; }
 .user-email { font-size:12px; color:var(--text-3); }
@@ -561,7 +570,7 @@ tr:hover td { background:#fafbff; }
   <div class="card">
     <div class="card-header">
       <div><div class="card-title">Tipos de Lead Cadastrados</div><div class="card-sub">Gerencie os tipos de lead</div></div>
-      <button class="btn btn-primary btn-sm" onclick="openEquipModal()">＋ Novo</button>
+      <button class="btn btn-primary btn-sm admin-only hidden" onclick="openEquipModal()">＋ Novo</button>
     </div>
     <div class="equip-list" id="equip-list"></div>
   </div>
@@ -569,12 +578,18 @@ tr:hover td { background:#fafbff; }
 
 <!-- ── USUÁRIOS ── -->
 <div class="page" id="page-usuarios">
+  <div class="user-stats-bar" id="user-stats-bar">
+    <div class="user-stat"><div class="user-stat-val" id="ust-total">—</div><div class="user-stat-lbl">Total</div></div>
+    <div class="user-stat"><div class="user-stat-val" id="ust-admin" style="color:#7c3aed">—</div><div class="user-stat-lbl">Admins</div></div>
+    <div class="user-stat"><div class="user-stat-val" id="ust-active" style="color:#22c55e">—</div><div class="user-stat-lbl">Ativos</div></div>
+    <div class="user-stat"><div class="user-stat-val" id="ust-inactive" style="color:#ef4444">—</div><div class="user-stat-lbl">Inativos</div></div>
+  </div>
   <div class="card">
     <div class="card-header">
-      <div><div class="card-title">Usuários do Sistema</div><div class="card-sub">Gerencie acessos</div></div>
+      <div><div class="card-title">Usuários do Sistema</div><div class="card-sub">Gerencie acessos e permissões</div></div>
       <button class="btn btn-primary btn-sm" onclick="openUserModal()">＋ Novo Usuário</button>
     </div>
-    <div class="users-list" id="users-list"></div>
+    <div class="users-list" id="users-list" style="gap:10px;padding:16px 20px;"></div>
   </div>
 </div>
 
@@ -823,6 +838,29 @@ tr:hover td { background:#fafbff; }
   </div>
 </div>
 
+<!-- MODAL EDITAR USUÁRIO -->
+<div class="overlay" id="modal-edit-user">
+  <div class="modal" style="max-width:420px;">
+    <h2>Editar Usuário</h2>
+    <input type="hidden" id="eu-id">
+    <div class="form-group"><label>Nome *</label><input id="eu-name" placeholder="Nome completo"></div>
+    <div class="form-group" id="eu-email-wrap"><label>E-mail</label><input id="eu-email" type="email" disabled style="background:var(--bg);color:var(--text-3);cursor:not-allowed;"></div>
+    <div class="form-group"><label>Perfil</label>
+      <select id="eu-role">
+        <option value="user">Usuário — pode usar o sistema, sem acesso às configurações</option>
+        <option value="admin">Administrador — acesso total ao sistema</option>
+      </select>
+    </div>
+    <div style="background:#fef9c3;border:1px solid #fde047;border-radius:8px;padding:10px 14px;font-size:12px;color:#854d0e;margin-bottom:16px;">
+      ⚠️ <strong>Usuário</strong> não pode gerenciar outros usuários, tipos de lead nem ver relatórios.
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="document.getElementById('modal-edit-user').classList.remove('open')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveEditUser()">Salvar Alterações</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL IMPORT -->
 <div class="overlay" id="modal-import">
   <div class="modal" style="max-width:620px;">
@@ -959,6 +997,18 @@ async function onLogin(user) {
       prof = res?.data || null;
     } catch(e) { console.warn('Profile timeout:', e.message); }
     currentProfile = prof;
+
+    // Bloqueia usuários inativos
+    if (prof && prof.active === false) {
+      await sb.auth.signOut();
+      const errEl = document.getElementById('login-error');
+      errEl.textContent = 'Sua conta está desativada. Entre em contato com o administrador.';
+      errEl.classList.add('show');
+      document.getElementById('login-screen').classList.add('active');
+      document.getElementById('app-wrap').classList.add('hidden');
+      clearTimeout(hardTimeout);
+      return;
+    }
 
     // Registra login (silencioso, sem await)
     sb.from('login_logs').insert({
@@ -1600,6 +1650,7 @@ async function deleteLead(id) {
 
 // ─── EQUIP MODAL ─────────────────────────────────────────────
 function openEquipModal(eq=null) {
+  if (currentProfile?.role !== 'admin') { toast('Acesso restrito a administradores.'); return; }
   editingEquip = eq;
   document.getElementById('modal-equip-title').textContent = eq ? 'Editar Tipo de Lead' : 'Novo Tipo de Lead';
   document.getElementById('eq-label').value = eq?.label||'';
@@ -1651,18 +1702,20 @@ async function saveEquip() {
 function renderEquipList() {
   const list = document.getElementById('equip-list');
   if (!list) return;
+  const isAdmin = currentProfile?.role === 'admin';
   list.innerHTML = equips.length ? equips.map(e=>`
     <div class="equip-item">
       <div class="equip-color-dot" style="background:${e.color}"></div>
       <div class="equip-label-text">${e.label}</div>
       <div class="equip-actions">
-        <button class="btn btn-ghost btn-sm" onclick="openEquipModal(${JSON.stringify(e).replace(/"/g,'&quot;')})">✏️</button>
-        <button class="btn btn-danger btn-sm" onclick="deleteEquip('${e.id}')">🗑</button>
+        ${isAdmin ? `<button class="btn btn-ghost btn-sm" onclick="openEquipModal(${JSON.stringify(e).replace(/"/g,'&quot;')})">✏️</button>` : ''}
+        ${isAdmin ? `<button class="btn btn-danger btn-sm" onclick="deleteEquip('${e.id}')">🗑</button>` : ''}
       </div>
     </div>`).join('') : '<div style="padding:20px;text-align:center;color:var(--text-3);">Nenhum tipo de lead cadastrado.</div>';
 }
 
 async function deleteEquip(id) {
+  if (currentProfile?.role !== 'admin') { toast('Acesso restrito a administradores.'); return; }
   if (!confirm('Excluir este tipo de lead?')) return;
   const eq = equips.find(x=>x.id===id);
   const {error} = await sb.from('equipamentos').delete().eq('id',id);
@@ -1676,19 +1729,45 @@ async function deleteEquip(id) {
 async function loadUsersPage() {
   const list = document.getElementById('users-list');
   list.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text-3);">Carregando…</div>';
-  const {data, error} = await sb.from('profiles').select('*').order('created_at');
+  const {data, error} = await sb.from('profiles').select('*').order('role').order('name');
   if (error || !data) { list.innerHTML = '<div style="padding:20px;color:var(--danger);">Erro ao carregar usuários.</div>'; return; }
-  list.innerHTML = data.length ? data.map(u=>`
-    <div class="user-item">
-      <div class="user-avatar-sm">${(u.name||'?').charAt(0).toUpperCase()}</div>
+
+  // Stats
+  const total    = data.length;
+  const admins   = data.filter(u=>u.role==='admin').length;
+  const ativos   = data.filter(u=>u.active!==false).length;
+  const inativos = data.filter(u=>u.active===false).length;
+  document.getElementById('ust-total').textContent   = total;
+  document.getElementById('ust-admin').textContent   = admins;
+  document.getElementById('ust-active').textContent  = ativos;
+  document.getElementById('ust-inactive').textContent= inativos;
+
+  const isSelf = id => id === currentUser?.id;
+  list.innerHTML = data.length ? data.map(u => {
+    const isAdmin = u.role === 'admin';
+    const isActive = u.active !== false;
+    const self = isSelf(u.id);
+    const avatarClass = isAdmin ? 'user-avatar-sm user-avatar-admin' : 'user-avatar-sm';
+    const initial = (u.name||u.email||'?').charAt(0).toUpperCase();
+    return `
+    <div class="user-item" style="${!isActive?'opacity:.6':''}">
+      <div class="${avatarClass}">${initial}</div>
       <div class="user-info">
-        <div class="user-name">${u.name}</div>
-        <div class="user-email">${u.email||'—'}</div>
+        <div class="user-name-row">
+          <span style="font-size:14px;font-weight:700;color:var(--text);">${u.name||'—'}</span>
+          <span class="user-badge ${isAdmin?'badge-admin':'badge-user'}">${isAdmin?'👑 Admin':'👤 Usuário'}</span>
+          ${!isActive ? '<span class="user-badge badge-inactive">🔒 Inativo</span>' : ''}
+          ${self ? '<span style="font-size:10px;background:#f0fdf4;color:#16a34a;border:1px solid #86efac;border-radius:99px;padding:2px 8px;font-weight:700;">Você</span>' : ''}
+        </div>
+        <div style="font-size:12px;color:var(--text-3);">${u.email||'—'}</div>
       </div>
-      <span class="user-badge ${u.role==='admin'?'badge-admin':'badge-user'}">${u.role==='admin'?'Admin':'Usuário'}</span>
-      ${!u.active ? '<span class="user-badge badge-inactive">Inativo</span>' : ''}
-      ${u.id !== currentUser?.id ? `<button class="btn btn-danger btn-sm" onclick="toggleUserActive('${u.id}',${u.active})">${u.active?'Desativar':'Ativar'}</button>` : ''}
-    </div>`).join('') : '<div style="padding:20px;text-align:center;color:var(--text-3);">Nenhum usuário.</div>';
+      <div class="user-actions">
+        <button class="btn btn-ghost btn-sm" title="Editar usuário" onclick="openEditUserModal('${u.id}','${(u.name||'').replace(/'/g,"\\'")}','${u.email||''}','${u.role}')">✏️ Editar</button>
+        ${!self ? `<button class="btn btn-ghost btn-sm" title="${isActive?'Desativar':'Ativar'} acesso" onclick="toggleUserActive('${u.id}',${isActive})" style="color:${isActive?'var(--warning)':'var(--success)'};">${isActive?'🔒 Desativar':'🔓 Ativar'}</button>` : ''}
+        ${!self ? `<button class="btn btn-danger btn-sm" title="Excluir usuário" onclick="deleteUser('${u.id}','${(u.name||u.email).replace(/'/g,"\\'")}')">🗑 Excluir</button>` : ''}
+      </div>
+    </div>`;
+  }).join('') : '<div style="padding:20px;text-align:center;color:var(--text-3);">Nenhum usuário.</div>';
 }
 
 function openUserModal() {
@@ -1712,14 +1791,48 @@ async function saveUser() {
   hideLoading();
   if (error || data?.error) { toast('Erro: '+(data?.error||error?.message)); return; }
   await logActivity('Criou Usuário','Usuário',data.id,name,`email: ${email}, role: ${role}`);
-  toast('Usuário criado!');
+  toast('Usuário criado com sucesso!');
+  loadUsersPage();
+}
+
+function openEditUserModal(uid, name, email, role) {
+  document.getElementById('eu-id').value    = uid;
+  document.getElementById('eu-name').value  = name;
+  document.getElementById('eu-email').value = email;
+  document.getElementById('eu-role').value  = role;
+  document.getElementById('modal-edit-user').classList.add('open');
+}
+
+async function saveEditUser() {
+  const uid  = document.getElementById('eu-id').value;
+  const name = document.getElementById('eu-name').value.trim();
+  const role = document.getElementById('eu-role').value;
+  if (!name) { toast('Nome obrigatório.'); return; }
+  document.getElementById('modal-edit-user').classList.remove('open');
+  showLoading();
+  const {error} = await sb.rpc('update_app_user', {p_user_id: uid, p_name: name, p_role: role});
+  hideLoading();
+  if (error) { toast('Erro: ' + error.message); return; }
+  await logActivity('Editou Usuário', 'Usuário', uid, name, `role: ${role}`);
+  toast('Usuário atualizado!');
+  loadUsersPage();
+}
+
+async function deleteUser(uid, name) {
+  if (!confirm(`Excluir o usuário "${name}" permanentemente?\n\nEsta ação não pode ser desfeita.`)) return;
+  showLoading();
+  const {error} = await sb.rpc('delete_app_user', {p_user_id: uid});
+  hideLoading();
+  if (error) { toast('Erro ao excluir: ' + error.message); return; }
+  await logActivity('Excluiu Usuário', 'Usuário', uid, name);
+  toast(`Usuário "${name}" excluído.`);
   loadUsersPage();
 }
 
 async function toggleUserActive(uid, active) {
-  const {error} = await sb.from('profiles').update({active:!active}).eq('id',uid);
+  const {error} = await sb.from('profiles').update({active: !active}).eq('id', uid);
   if (error) { toast('Erro ao alterar.'); return; }
-  toast(active ? 'Usuário desativado.' : 'Usuário ativado.');
+  toast(active ? 'Usuário desativado — não conseguirá mais acessar o sistema.' : 'Usuário ativado.');
   loadUsersPage();
 }
 
