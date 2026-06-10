@@ -231,6 +231,39 @@ tr:hover td { background:#fafbff; }
 .s-sem_int   { background:#f1f5f9; color:#475569; }
 .s-nao_ret   { background:#ffedd5; color:#9a3412; }
 
+/* CONTROLE DE ACESSO */
+.user-access-card { background:var(--card); border:1.5px solid var(--border); border-radius:var(--radius); margin-bottom:12px; overflow:hidden; }
+.user-access-header { display:flex; align-items:center; gap:14px; padding:14px 18px; cursor:pointer; transition:background .15s; }
+.user-access-header:hover { background:var(--bg); }
+.user-access-avatar { width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,var(--primary-light),var(--primary)); color:#fff; display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:800; flex-shrink:0; }
+.user-access-info { flex:1; min-width:0; }
+.user-access-name { font-size:14px; font-weight:700; color:var(--text); }
+.user-access-email { font-size:12px; color:var(--text-3); margin-top:2px; }
+.user-access-stats { display:flex; gap:18px; align-items:center; }
+.user-stat { text-align:center; }
+.user-stat-val { font-size:16px; font-weight:800; color:var(--primary-light); }
+.user-stat-lbl { font-size:10px; color:var(--text-3); font-weight:600; text-transform:uppercase; }
+.user-access-chevron { color:var(--text-3); font-size:14px; transition:transform .2s; }
+.user-access-chevron.open { transform:rotate(90deg); }
+.user-access-body { display:none; padding:0 18px 14px; border-top:1px solid var(--border); }
+.user-access-body.open { display:block; }
+.timeline { padding-top:14px; }
+.tl-item { display:flex; gap:12px; padding:6px 0; font-size:13px; }
+.tl-dot-wrap { display:flex; flex-direction:column; align-items:center; gap:0; flex-shrink:0; width:16px; }
+.tl-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; margin-top:3px; }
+.tl-dot.login { background:var(--primary-light); }
+.tl-dot.activity { background:var(--success); }
+.tl-line { width:2px; flex:1; min-height:8px; background:var(--border); }
+.tl-content { flex:1; padding-bottom:4px; }
+.tl-time { font-size:11px; color:var(--text-3); font-weight:600; }
+.tl-action { font-weight:700; color:var(--text); }
+.tl-detail { font-size:12px; color:var(--text-2); margin-top:1px; }
+.tl-badge { display:inline-block; padding:1px 7px; border-radius:99px; font-size:10px; font-weight:700; margin-right:4px; }
+.tl-badge.login { background:#e0e7ff; color:var(--primary-light); }
+.tl-badge.activity { background:#d1fae5; color:#059669; }
+.controle-filters { display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap; margin-bottom:18px; }
+.controle-empty { text-align:center; padding:60px 20px; color:var(--text-3); }
+
 /* TOAST */
 #toast { position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(60px); background:#1e2d6b; color:#fff; padding:11px 22px; border-radius:10px; font-size:13px; font-weight:700; z-index:9000; transition:.3s; opacity:0; white-space:nowrap; }
 #toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
@@ -325,6 +358,9 @@ tr:hover td { background:#fafbff; }
     </div>
 
     <div class="sidebar-section admin-only hidden">Relatórios</div>
+    <div class="nav-item admin-only hidden" data-page="controle" onclick="navTo('controle',this)">
+      <span class="nav-icon">👤</span> Controle de Acesso
+    </div>
     <div class="nav-item admin-only hidden" data-page="rel-atividade" onclick="navTo('rel-atividade',this)">
       <span class="nav-icon">📝</span> Atividade
     </div>
@@ -506,6 +542,36 @@ tr:hover td { background:#fafbff; }
         <thead><tr><th>Data/Hora</th><th>Usuário</th><th>E-mail</th></tr></thead>
         <tbody id="logins-tbody"></tbody>
       </table>
+    </div>
+  </div>
+</div>
+
+<!-- ── CONTROLE DE ACESSO ── -->
+<div class="page" id="page-controle">
+  <div class="card">
+    <div class="card-header">
+      <div><div class="card-title">Controle de Acesso</div><div class="card-sub">Logins e atividades por usuário</div></div>
+      <button class="btn btn-ghost btn-sm" onclick="exportControleCSV()">⬇ CSV</button>
+    </div>
+    <div style="padding:16px 22px 0;">
+      <div class="controle-filters">
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--text-2);display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px;">De</label>
+          <input type="date" id="ctrl-from" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13px;outline:none;">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--text-2);display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px;">Até</label>
+          <input type="date" id="ctrl-to" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13px;outline:none;">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--text-2);display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px;">Usuário</label>
+          <input type="text" id="ctrl-user" placeholder="Nome ou e-mail..." style="padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13px;outline:none;min-width:200px;">
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="loadControleAcesso()">Filtrar</button>
+      </div>
+    </div>
+    <div style="padding:0 22px 22px;" id="controle-wrap">
+      <div class="controle-empty"><div style="font-size:40px;margin-bottom:12px;">👤</div>Carregando...</div>
     </div>
   </div>
 </div>
@@ -851,6 +917,7 @@ const PAGE_META = {
   usuarios:      { title:'Usuários',        sub:'Gerenciamento de acesso' },
   'rel-atividade':{ title:'Atividade',      sub:'Log de ações no sistema' },
   'rel-logins':  { title:'Logins',          sub:'Histórico de acessos' },
+  'controle':    { title:'Controle de Acesso', sub:'Histórico por usuário' },
 };
 const TOPBAR_PAGES = new Set(['list']);
 
@@ -877,6 +944,7 @@ function navTo(page, el) {
   if (page==='usuarios') loadUsersPage();
   if (page==='rel-atividade') loadActivityReport();
   if (page==='rel-logins') loadLoginsReport();
+  if (page==='controle') loadControleAcesso();
 }
 
 // ─── RENDER CHIPS ────────────────────────────────────────────
@@ -1357,6 +1425,126 @@ function exportLoginsCSV() {
   const hdr = ['Data/Hora','Usuário','E-mail'];
   const rows = loginsData.map(r=>[fmtDate(r.created_at),r.user_name||'',r.user_email||'']);
   downloadCSV('logins.csv', [hdr,...rows]);
+}
+
+// ─── CONTROLE DE ACESSO ──────────────────────────────────────
+let controleData = []; // [{user_email, user_name, logins:[], activities:[]}]
+
+async function loadControleAcesso() {
+  const from = document.getElementById('ctrl-from').value;
+  const to   = document.getElementById('ctrl-to').value;
+  const userFilter = document.getElementById('ctrl-user').value.trim().toLowerCase();
+  const wrap = document.getElementById('controle-wrap');
+  wrap.innerHTML = '<div class="controle-empty"><div style="font-size:40px;margin-bottom:12px;">⏳</div>Carregando...</div>';
+
+  // Busca logins e atividades em paralelo
+  let qLogins = sb.from('login_logs').select('*').order('created_at',{ascending:false}).limit(2000);
+  let qActs   = sb.from('activity_logs').select('*').order('created_at',{ascending:false}).limit(2000);
+  if (from) { qLogins = qLogins.gte('created_at', from+'T00:00:00'); qActs = qActs.gte('created_at', from+'T00:00:00'); }
+  if (to)   { qLogins = qLogins.lte('created_at', to+'T23:59:59');   qActs = qActs.lte('created_at', to+'T23:59:59'); }
+
+  const [{data: logins}, {data: acts}] = await Promise.all([qLogins, qActs]);
+
+  // Agrupa por usuário
+  const users = {};
+  const addUser = (email, name) => {
+    const key = (email||'').toLowerCase();
+    if (!users[key]) users[key] = { email: email||'', name: name||email||'?', logins:[], activities:[] };
+    if (name && name !== email && users[key].name === users[key].email) users[key].name = name;
+  };
+  (logins||[]).forEach(r => { addUser(r.user_email, r.user_name); users[(r.user_email||'').toLowerCase()].logins.push(r); });
+  (acts||[]).forEach(r => { addUser(r.user_email, r.user_name); users[(r.user_email||'').toLowerCase()].activities.push(r); });
+
+  // Filtra por usuário digitado
+  let entries = Object.values(users);
+  if (userFilter) entries = entries.filter(u =>
+    u.name.toLowerCase().includes(userFilter) || u.email.toLowerCase().includes(userFilter)
+  );
+
+  // Ordena por último acesso (mais recente primeiro)
+  entries.sort((a,b) => {
+    const la = a.logins[0]?.created_at || '';
+    const lb = b.logins[0]?.created_at || '';
+    return lb.localeCompare(la);
+  });
+
+  controleData = entries;
+
+  if (!entries.length) {
+    wrap.innerHTML = '<div class="controle-empty"><div style="font-size:40px;margin-bottom:12px;">🔍</div>Nenhum registro encontrado.</div>';
+    return;
+  }
+
+  wrap.innerHTML = entries.map((u, idx) => {
+    const lastLogin = u.logins[0]?.created_at;
+    const inicial = (u.name||'?').charAt(0).toUpperCase();
+
+    // Timeline: combina logins + atividades ordenados por data desc
+    const allEvents = [
+      ...u.logins.map(r => ({type:'login', ts: r.created_at, label:'Login', detail: r.user_email})),
+      ...u.activities.map(r => ({type:'activity', ts: r.created_at, label: r.action, detail: [r.entity_name, r.details].filter(Boolean).join(' — ')}))
+    ].sort((a,b) => b.ts.localeCompare(a.ts));
+
+    const timelineHTML = allEvents.map((e, i) => `
+      <div class="tl-item">
+        <div class="tl-dot-wrap">
+          <div class="tl-dot ${e.type}"></div>
+          ${i < allEvents.length-1 ? '<div class="tl-line"></div>' : ''}
+        </div>
+        <div class="tl-content">
+          <div class="tl-time">${fmtDate(e.ts)}</div>
+          <div><span class="tl-badge ${e.type}">${e.type==='login'?'Login':'Ação'}</span><span class="tl-action">${e.label}</span></div>
+          ${e.detail ? `<div class="tl-detail">${e.detail}</div>` : ''}
+        </div>
+      </div>`).join('');
+
+    return `
+    <div class="user-access-card">
+      <div class="user-access-header" onclick="toggleControleCard(${idx})">
+        <div class="user-access-avatar">${inicial}</div>
+        <div class="user-access-info">
+          <div class="user-access-name">${u.name}</div>
+          <div class="user-access-email">${u.email}</div>
+        </div>
+        <div class="user-access-stats">
+          <div class="user-stat">
+            <div class="user-stat-val">${u.logins.length}</div>
+            <div class="user-stat-lbl">Logins</div>
+          </div>
+          <div class="user-stat">
+            <div class="user-stat-val">${u.activities.length}</div>
+            <div class="user-stat-lbl">Ações</div>
+          </div>
+          <div class="user-stat">
+            <div class="user-stat-val" style="font-size:12px;font-weight:600;color:var(--text-2);">${lastLogin ? fmtDate(lastLogin) : '—'}</div>
+            <div class="user-stat-lbl">Último acesso</div>
+          </div>
+        </div>
+        <div class="user-access-chevron" id="ctrl-chev-${idx}">▶</div>
+      </div>
+      <div class="user-access-body" id="ctrl-body-${idx}">
+        <div class="timeline">${timelineHTML || '<div style="color:var(--text-3);font-size:13px;padding:8px 0;">Nenhum evento registrado.</div>'}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleControleCard(idx) {
+  const body = document.getElementById('ctrl-body-'+idx);
+  const chev = document.getElementById('ctrl-chev-'+idx);
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  chev.classList.toggle('open', !isOpen);
+}
+
+function exportControleCSV() {
+  if (!controleData.length) { toast('Nenhum dado para exportar.'); return; }
+  const rows = [['Usuário','E-mail','Tipo','Data/Hora','Ação','Detalhe']];
+  controleData.forEach(u => {
+    u.logins.forEach(r => rows.push([u.name, u.email, 'Login', fmtDate(r.created_at), 'Login', '']));
+    u.activities.forEach(r => rows.push([u.name, u.email, 'Ação', fmtDate(r.created_at), r.action||'', [r.entity_name, r.details].filter(Boolean).join(' — ')]));
+  });
+  downloadCSV('controle-acesso.csv', rows);
 }
 
 // ─── HELPERS ─────────────────────────────────────────────────
